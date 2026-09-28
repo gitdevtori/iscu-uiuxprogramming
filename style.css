@@ -97,6 +97,15 @@ p {
     margin-top: 0;
 }
 
+/* 이용 방법 */
+#howto ol {
+    padding-left: 20px;
+}
+
+#howto li {
+    margin-bottom: 10px;
+}
+
 /* 메뉴 추천 */
 #recommend img {
     display: block;

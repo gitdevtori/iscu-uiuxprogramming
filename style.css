@@ -40,3 +40,36 @@ nav a:hover {
     background-color: #ffffff;
     color: #ff7a45;
 }
+
+/* 본문 영역 */
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+section {
+    background-color: #ffffff;
+    margin-bottom: 30px;
+    padding: 25px 30px;
+    border: 1px solid #eeeeee;
+    border-radius: 10px;
+}
+
+h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    font-size: 26px;
+    color: #ff7a45;
+    border-bottom: 2px solid #ffd8c7;
+}
+
+h3 {
+    margin: 20px 0 8px;
+    font-size: 19px;
+    color: #222222;
+}
+
+p {
+    margin: 0 0 12px;
+}

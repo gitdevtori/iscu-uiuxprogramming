@@ -113,3 +113,16 @@ p {
     margin: 15px 0;
     border-radius: 10px;
 }
+
+/* 푸터 */
+footer {
+    background-color: #333333;
+    color: #cccccc;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+footer p {
+    margin: 0;
+}

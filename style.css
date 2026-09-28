@@ -114,6 +114,32 @@ p {
     border-radius: 10px;
 }
 
+/* 음식 입력 */
+button {
+    padding: 7px 14px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #ff7a45;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+button:hover {
+    background-color: #f26d38;
+}
+
+button:active {
+    background-color: #e8622c;
+    transform: translateY(1px);
+}
+
+button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px #ffd8c7;
+}
+
 /* 푸터 */
 footer {
     background-color: #333333;

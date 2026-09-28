@@ -1,0 +1,42 @@
+/* 기본 설정 */
+body {
+    margin: 0;
+    background-color: #fdf8f3;
+    color: #333333;
+    font-family: "Malgun Gothic", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* 헤더 */
+header {
+    background-color: #ff7a45;
+    color: #ffffff;
+    padding: 40px 20px 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 10px;
+    font-size: 40px;
+}
+
+header p {
+    margin: 0 0 25px;
+    font-size: 18px;
+}
+
+nav a {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 16px;
+    color: #ffffff;
+    text-decoration: none;
+    border: 1px solid #ffffff;
+    border-radius: 20px;
+}
+
+nav a:hover {
+    background-color: #ffffff;
+    color: #ff7a45;
+}

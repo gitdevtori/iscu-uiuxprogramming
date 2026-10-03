@@ -43,6 +43,8 @@ nav a:hover {
 
 /* 본문 영역 */
 main {
+    box-sizing: border-box;
+    width: 100%;
     max-width: 800px;
     margin: 0 auto;
     padding: 30px 20px;
@@ -116,6 +118,8 @@ p {
 #recommend img {
     display: block;
     width: 100%;
+    max-width: 100%;
+    height: auto;
     margin: 15px 0;
     border-radius: 10px;
 }

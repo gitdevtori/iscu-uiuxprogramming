@@ -78,8 +78,8 @@ p {
 
 /* 주요 기능 */
 #features ul {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
     list-style: none;
     padding: 0;
@@ -87,8 +87,6 @@ p {
 }
 
 #features li {
-    flex: 1;
-    min-width: 180px;
     background-color: #fff4ee;
     padding: 20px;
     border-radius: 10px;

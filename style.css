@@ -148,6 +148,35 @@ button:focus-visible {
     box-shadow: 0 0 0 3px #ffd8c7;
 }
 
+button:disabled {
+    background-color: #cccccc;
+    cursor: default;
+    transform: none;
+}
+
+/* 안내 문구 */
+#message {
+    margin: 15px 0 0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+#message:empty {
+    display: none;
+}
+
+#message.success {
+    background-color: #fff4ee;
+    color: #c4501f;
+    font-weight: bold;
+}
+
+#message.error {
+    background-color: #fdecec;
+    color: #c62828;
+}
+
 /* 푸터 */
 footer {
     background-color: #333333;

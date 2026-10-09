@@ -34,8 +34,20 @@ function handleSubmit(event) {
     message.textContent = getRecommendMessage(email);
 
     if (email === "" || !isEmail(email)) {
+        message.className = "error";
         emailInput.focus();
+    } else {
+        message.className = "success";
+        button.disabled = true;
+        button.textContent = "추천완료";
     }
 }
 
+// 입력 내용이 바뀌면 다시 추천받을 수 있게 버튼을 되돌리는 함수
+function handleInput() {
+    button.disabled = false;
+    button.textContent = "추천받기";
+}
+
 form.addEventListener("submit", handleSubmit);
+emailInput.addEventListener("input", handleInput);

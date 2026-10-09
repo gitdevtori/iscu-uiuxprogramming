@@ -123,6 +123,28 @@ p {
 }
 
 /* 음식 입력 */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input {
+    box-sizing: border-box;
+    width: 70%;
+    padding: 7px 10px;
+    font-size: 14px;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus {
+    outline: none;
+    border-color: #ff7a45;
+    box-shadow: 0 0 0 3px #ffd8c7;
+}
+
 button {
     padding: 7px 14px;
     font-size: 14px;
@@ -241,6 +263,11 @@ footer p {
         box-sizing: border-box;
         display: block;
         width: 100%;
+    }
+
+    input {
+        padding: 10px;
+        font-size: 16px;
     }
 
     button {

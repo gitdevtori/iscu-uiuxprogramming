@@ -141,9 +141,11 @@
                 name="email"
                 placeholder="예: name@example.com"
                 pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                aria-describedby="emailHint"
                 required
             >
-            <button id="recommendButton" type="submit">추천받기</button>
+            <button id="recommendButton" type="submit" disabled>추천받기</button>
+            <p id="emailHint"></p>
         </form>
 
         <p id="recommendMessage" aria-live="polite">음식 종류를 고르고 이메일을 입력한 뒤 추천받기를 눌러 주세요.</p>

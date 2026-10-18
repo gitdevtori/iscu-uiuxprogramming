@@ -2,6 +2,7 @@
 const recommendForm = document.querySelector("#recommend-form");
 const categorySelect = document.querySelector("#category");
 const emailInput = document.querySelector("#email");
+const emailHint = document.querySelector("#emailHint");
 const recommendButton = document.querySelector("#recommendButton");
 const recommendMessage = document.querySelector("#recommendMessage");
 const tabButtons = document.querySelectorAll(".tab");
@@ -88,10 +89,25 @@ function handleSubmit(event) {
     }
 }
 
-// 입력 내용이 바뀌면 다시 추천받을 수 있게 버튼을 되돌리는 함수
+// 이메일을 입력할 때마다 형식을 확인해 힌트와 버튼 상태를 바꾸는 함수
 function handleInput() {
-    recommendButton.disabled = false;
     recommendButton.textContent = "추천받기";
+    emailHint.hidden = false;
+    emailHint.classList.remove("is-invalid");
+    emailInput.classList.remove("is-invalid");
+
+    if (emailInput.value.trim() === "") {
+        emailHint.textContent = "";
+        recommendButton.disabled = true;
+    } else if (emailInput.validity.valid) {
+        emailHint.hidden = true;
+        recommendButton.disabled = false;
+    } else {
+        emailHint.textContent = "name@example.com 형식으로 입력해 주세요.";
+        emailHint.classList.add("is-invalid");
+        emailInput.classList.add("is-invalid");
+        recommendButton.disabled = true;
+    }
 }
 
 // 음식 종류를 바꾸면 안내 문구와 버튼을 새 선택에 맞게 바꾸는 함수
@@ -101,7 +117,7 @@ function handleCategoryChange() {
     recommendMessage.textContent = categoryName + " 메뉴 중에서 추천해 드릴게요. 이메일을 입력한 뒤 추천받기를 눌러 주세요.";
     recommendMessage.classList.remove("is-success", "is-error");
     recommendMessage.classList.add("is-info");
-    recommendButton.disabled = false;
+    recommendButton.disabled = !emailInput.validity.valid;
     recommendButton.textContent = "추천받기";
 }
 

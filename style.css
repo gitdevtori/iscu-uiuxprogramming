@@ -191,6 +191,20 @@ input:focus {
     box-shadow: 0 0 0 3px #ffd8c7;
 }
 
+input.is-invalid {
+    border-color: #e57373;
+}
+
+#emailHint {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: #888888;
+}
+
+#emailHint.is-invalid {
+    color: #c62828;
+}
+
 select {
     box-sizing: border-box;
     width: 70%;

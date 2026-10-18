@@ -126,6 +126,14 @@
         <h2>메뉴 추천 신청하기</h2>
 
         <form id="recommend-form" novalidate>
+            <label for="category">음식 종류</label>
+            <select id="category" name="category">
+                <option value="all">전체</option>
+                <option value="korean">한식</option>
+                <option value="western">양식</option>
+                <option value="snack">분식</option>
+            </select>
+
             <label for="email">이메일</label>
             <input
                 type="email"
@@ -138,7 +146,7 @@
             <button id="recommendButton" type="submit">추천받기</button>
         </form>
 
-        <p id="recommendMessage" aria-live="polite">이메일을 입력한 뒤 추천받기를 눌러 주세요.</p>
+        <p id="recommendMessage" aria-live="polite">음식 종류를 고르고 이메일을 입력한 뒤 추천받기를 눌러 주세요.</p>
     </section>
 
 </main>

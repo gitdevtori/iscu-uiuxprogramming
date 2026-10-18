@@ -191,6 +191,23 @@ input:focus {
     box-shadow: 0 0 0 3px #ffd8c7;
 }
 
+select {
+    box-sizing: border-box;
+    width: 70%;
+    margin-bottom: 15px;
+    padding: 7px 10px;
+    font-size: 14px;
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+}
+
+select:focus {
+    outline: none;
+    border-color: #ff7a45;
+    box-shadow: 0 0 0 3px #ffd8c7;
+}
+
 button {
     padding: 7px 14px;
     font-size: 14px;
@@ -241,6 +258,11 @@ button:disabled {
 #recommendMessage.is-error {
     background-color: #fdecec;
     color: #c62828;
+}
+
+#recommendMessage.is-info {
+    background-color: #fff8e1;
+    color: #8a5a00;
 }
 
 /* 푸터 */
@@ -309,7 +331,9 @@ footer p {
         width: 100%;
     }
 
-    input {
+    input,
+    select {
+        width: 100%;
         padding: 10px;
         font-size: 16px;
     }

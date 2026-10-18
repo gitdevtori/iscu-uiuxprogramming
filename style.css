@@ -177,24 +177,22 @@ button:disabled {
 }
 
 /* 안내 문구 */
-#message {
+#recommendMessage {
     margin: 15px 0 0;
     padding: 12px 15px;
     border-radius: 8px;
+    background-color: #f5f5f5;
+    color: #666666;
     overflow-wrap: anywhere;
 }
 
-#message:empty {
-    display: none;
-}
-
-#message.success {
+#recommendMessage.is-success {
     background-color: #fff4ee;
     color: #c4501f;
     font-weight: bold;
 }
 
-#message.error {
+#recommendMessage.is-error {
     background-color: #fdecec;
     color: #c62828;
 }

@@ -25,7 +25,7 @@
         <a href="#intro">서비스 소개</a>
         <a href="#features">주요 기능</a>
         <a href="#howto">이용 방법</a>
-        <a href="#recommend">메뉴 추천</a>
+        <a href="#recommend">메뉴 둘러보기</a>
     </nav>
 </header>
 
@@ -78,9 +78,48 @@
     </section>
 
     <section id="recommend">
-        <h2>오늘의 메뉴 추천</h2>
+        <h2>종류별 메뉴 둘러보기</h2>
 
         <img src="assets/images/food.png" alt="다양한 음식이 놓여 있는 식탁">
+
+        <div class="tabs" role="tablist">
+            <button type="button" class="tab is-active" role="tab" data-tab="korean" aria-selected="true">한식</button>
+            <button type="button" class="tab" role="tab" data-tab="western" aria-selected="false">양식</button>
+            <button type="button" class="tab" role="tab" data-tab="snack" aria-selected="false">분식</button>
+        </div>
+
+        <div class="tab-panel" id="panel-korean" role="tabpanel">
+            <p>든든한 밥과 국물이 생각날 때 고르기 좋은 메뉴입니다.</p>
+            <ul class="menu-list">
+                <li>김치찌개</li>
+                <li>된장찌개</li>
+                <li>순두부찌개</li>
+                <li>비빔밥</li>
+                <li>제육볶음</li>
+            </ul>
+        </div>
+
+        <div class="tab-panel" id="panel-western" role="tabpanel" hidden>
+            <p>색다른 한 끼나 특별한 날에 어울리는 메뉴입니다.</p>
+            <ul class="menu-list">
+                <li>파스타</li>
+                <li>피자</li>
+                <li>햄버거</li>
+                <li>돈가스</li>
+                <li>오므라이스</li>
+            </ul>
+        </div>
+
+        <div class="tab-panel" id="panel-snack" role="tabpanel" hidden>
+            <p>간단하고 빠르게 먹고 싶을 때 좋은 메뉴입니다.</p>
+            <ul class="menu-list">
+                <li>떡볶이</li>
+                <li>김밥</li>
+                <li>라면</li>
+                <li>순대</li>
+                <li>튀김</li>
+            </ul>
+        </div>
     </section>
 
     <section id="input">

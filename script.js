@@ -3,9 +3,34 @@ const recommendForm = document.querySelector("#recommend-form");
 const emailInput = document.querySelector("#email");
 const recommendButton = document.querySelector("#recommendButton");
 const recommendMessage = document.querySelector("#recommendMessage");
+const tabButtons = document.querySelectorAll(".tab");
+const tabPanels = document.querySelectorAll(".tab-panel");
 
-// 추천할 음식 목록
-const foods = ["김치찌개", "된장찌개", "순두부찌개", "떡볶이", "돈가스", "파스타", "카레", "피자", "햄버거", "오므라이스", "쌀국수"];
+// 종류별 추천 메뉴 목록
+const menus = {
+    korean: ["김치찌개", "된장찌개", "순두부찌개", "비빔밥", "제육볶음"],
+    western: ["파스타", "피자", "햄버거", "돈가스", "오므라이스"],
+    snack: ["떡볶이", "김밥", "라면", "순대", "튀김"]
+};
+const foods = menus.korean.concat(menus.western, menus.snack);
+
+// 선택한 탭만 강조하고 해당 메뉴 목록만 보여주는 함수
+function showTab(tabName) {
+    tabButtons.forEach(function (tab) {
+        const isSelected = tab.dataset.tab === tabName;
+        tab.classList.toggle("is-active", isSelected);
+        tab.setAttribute("aria-selected", isSelected);
+    });
+
+    tabPanels.forEach(function (panel) {
+        panel.hidden = panel.id !== "panel-" + tabName;
+    });
+}
+
+// 탭을 클릭하면 실행되는 함수
+function handleTabClick(event) {
+    showTab(event.currentTarget.dataset.tab);
+}
 
 // 브라우저의 입력값 검사 결과로 안내 문구를 만드는 함수
 function makeRecommendMessage(email) {
@@ -48,3 +73,6 @@ function handleInput() {
 
 recommendForm.addEventListener("submit", handleSubmit);
 emailInput.addEventListener("input", handleInput);
+tabButtons.forEach(function (tab) {
+    tab.addEventListener("click", handleTabClick);
+});

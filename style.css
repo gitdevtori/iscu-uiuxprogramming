@@ -175,6 +175,7 @@ label {
     font-weight: bold;
 }
 
+input,
 select {
     min-height: 44px;
     box-sizing: border-box;
@@ -187,6 +188,7 @@ select {
     border-radius: 5px;
 }
 
+input:focus,
 select:focus {
     outline: none;
     border-color: #ff7a45;
@@ -286,6 +288,7 @@ button:disabled {
     font-size: 14px;
 }
 
+input.is-invalid,
 select.is-invalid {
     border-color: #c62828;
 }
@@ -395,4 +398,26 @@ footer p {
         flex-direction: column;
         gap: 0;
     }
+}
+
+/* 완료 후 이메일 추천 신청 */
+#email-form {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #ffd8c7;
+}
+
+#emailHint {
+    color: #666666;
+    font-size: 14px;
+}
+
+#emailHint.is-invalid {
+    color: #c62828;
+}
+
+#emailMessage {
+    margin-top: 12px;
+    color: #c4501f;
+    overflow-wrap: anywhere;
 }

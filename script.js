@@ -13,6 +13,11 @@ const flowPanels = document.querySelectorAll(".flow-panel");
 const steps = document.querySelectorAll(".steps li");
 const tabButtons = document.querySelectorAll(".tab");
 const tabPanels = document.querySelectorAll(".tab-panel");
+const emailForm = document.querySelector("#email-form");
+const emailInput = document.querySelector("#email");
+const emailHint = document.querySelector("#emailHint");
+const emailButton = document.querySelector("#emailButton");
+const emailMessage = document.querySelector("#emailMessage");
 let currentStep = 0;
 
 // 종류별 추천 메뉴와 매운맛 정보
@@ -163,6 +168,8 @@ function handleRecommend() {
 // 다시 시작하면 선택값, 안내 문구, 오류, 진행 상태를 모두 초기화하는 함수
 function handleRestart() {
     recommendForm.reset();
+    emailForm.reset();
+    handleEmailInput();
     categorySelect.classList.remove("is-invalid");
     spicySelect.classList.remove("is-invalid");
     categorySelect.removeAttribute("aria-invalid");
@@ -177,6 +184,50 @@ function handleRestart() {
     showStep(0);
 }
 
+// 이메일 형식을 검사하고 안내 문구와 버튼 상태를 바꾸는 함수
+function handleEmailInput() {
+    const isEmpty = emailInput.value.trim() === "";
+    const isValid = emailInput.validity.valid;
+    emailInput.classList.toggle("is-invalid", !isEmpty && !isValid);
+    emailHint.classList.toggle("is-invalid", !isEmpty && !isValid);
+    if (!isEmpty && !isValid) {
+        emailInput.setAttribute("aria-invalid", "true");
+    } else {
+        emailInput.removeAttribute("aria-invalid");
+    }
+    emailHint.hidden = isEmpty || isValid;
+    emailHint.textContent = isEmpty
+        ? ""
+        : "name@example.com 형식으로 입력해 주세요.";
+    emailButton.disabled = !isValid;
+    emailButton.textContent = "이메일로 추천받기";
+    emailMessage.textContent = "";
+}
+
+// 이메일 신청을 처리하는 함수
+function handleEmailSubmit(event) {
+    event.preventDefault();
+    if (currentStep !== 3) {
+        return;
+    }
+    handleEmailInput();
+    if (!emailInput.validity.valid) {
+        emailHint.hidden = false;
+        emailHint.textContent = "이메일을 name@example.com 형식으로 입력해 주세요.";
+        emailHint.classList.add("is-invalid");
+        emailInput.classList.add("is-invalid");
+        emailInput.setAttribute("aria-invalid", "true");
+        emailInput.focus();
+        return;
+    }
+
+    emailMessage.textContent = "선택한 취향: " + completedSummary.textContent;
+    emailButton.textContent = "입력 완료";
+    emailButton.disabled = true;
+}
+
+emailInput.addEventListener("input", handleEmailInput);
+emailForm.addEventListener("submit", handleEmailSubmit);
 recommendForm.addEventListener("submit", handleSubmit);
 document.querySelector("#startButton").addEventListener("click", function () {
     showStep(1);

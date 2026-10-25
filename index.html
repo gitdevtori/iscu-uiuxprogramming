@@ -186,6 +186,22 @@
             <h3 tabindex="-1">메뉴 추천이 완료되었어요!</h3>
             <p id="completedSummary"></p>
             <p id="recommendMessage" class="is-success"></p>
+            <form id="email-form" novalidate>
+                <label for="email">기록한 취향에 맞게 메뉴를 계속 추천해드릴까요?</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="예: name@example.com"
+                    autocomplete="email"
+                    pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                    aria-describedby="emailHint"
+                    required
+                >
+                <p id="emailHint" aria-live="polite" hidden></p>
+                <button id="emailButton" type="submit" disabled>이메일로 추천받기</button>
+                <p id="emailMessage" role="status"></p>
+            </form>
             <button type="button" id="restartButton">다시 시작</button>
         </div>
     </section>

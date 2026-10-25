@@ -13,7 +13,7 @@
 <!--
 사용자: 매일 무엇을 먹을지 고민하는 사람
 목적: 메뉴 고민 시간을 줄이고 간단하게 음식을 추천받기
-핵심 행동: 원하는 음식 정보를 입력하고 메뉴를 추천받기
+핵심 행동: 음식 종류와 매운맛 선호를 선택하고 메뉴를 추천받기
 정보 순서: 서비스 소개 → 주요 기능 → 이용 방법 → 메뉴 추천
 -->
 
@@ -35,15 +35,6 @@
         <h2>서비스 소개</h2>
 
         <h3>메뉴 고민을 간단하게</h3>
-        <p>
-            오늘뭐먹지는 매일 식사 시간마다 어떤 음식을 먹을지
-            고민하는 사람들을 위한 메뉴 추천 서비스입니다.
-        </p>
-
-        <p>
-            먹고 싶은 음식이나 원하는 메뉴의 특징을 입력하면
-            메뉴를 선택하는 데 도움을 받을 수 있습니다.
-        </p>
     </section>
 
     <section id="features">
@@ -52,7 +43,7 @@
         <ul>
             <li>
                 <h3>메뉴 추천</h3>
-                입력한 내용을 바탕으로 먹을 메뉴를 추천합니다.
+                선택한 취향을 바탕으로 먹을 메뉴를 추천합니다.
             </li>
 
             <li>
@@ -62,7 +53,7 @@
 
             <li>
                 <h3>간단한 이용</h3>
-                복잡한 과정 없이 간단한 입력만으로 이용할 수 있습니다.
+                복잡한 과정 없이 간단한 선택만으로 이용할 수 있습니다.
             </li>
         </ul>
     </section>
@@ -71,9 +62,10 @@
         <h2>이용 방법</h2>
 
         <ol>
-            <li>먹고 싶은 음식이나 원하는 조건을 생각합니다.</li>
-            <li>입력창에 원하는 내용을 입력합니다.</li>
-            <li>추천받은 메뉴를 확인하고 오늘의 식사를 선택합니다.</li>
+            <li>추천 시작 버튼을 눌러 메뉴 추천을 시작합니다.</li>
+            <li>원하는 음식 종류와 매운맛 선호를 선택합니다.</li>
+            <li>선택한 내용을 확인하고 추천받기 버튼을 누릅니다.</li>
+            <li>추천된 메뉴를 확인합니다. 다시 고르고 싶다면 다시 시작을 누릅니다.</li>
         </ol>
     </section>
 
@@ -90,7 +82,6 @@
         </div>
 
         <div class="tab-panel" id="panel-korean" role="tabpanel">
-            <p>든든한 밥과 국물이 생각날 때 고르기 좋은 메뉴입니다.</p>
             <ul class="menu-list">
                 <li>김치찌개</li>
                 <li>된장찌개</li>
@@ -101,7 +92,6 @@
         </div>
 
         <div class="tab-panel" id="panel-western" role="tabpanel" hidden>
-            <p>색다른 한 끼나 특별한 날에 어울리는 메뉴입니다.</p>
             <ul class="menu-list">
                 <li>파스타</li>
                 <li>피자</li>
@@ -122,7 +112,6 @@
         </div>
 
         <div class="tab-panel" id="panel-snack" role="tabpanel" hidden>
-            <p>간단하고 빠르게 먹고 싶을 때 좋은 메뉴입니다.</p>
             <ul class="menu-list">
                 <li>떡볶이</li>
                 <li>김밥</li>
@@ -134,39 +123,77 @@
     </section>
 
     <section id="input">
-        <h2>메뉴 추천 신청하기</h2>
+        <h2>오늘의 메뉴 추천</h2>
 
-        <form id="recommend-form" novalidate>
-            <label for="category">음식 종류</label>
-            <select id="category" name="category">
-                <option value="all">전체</option>
-                <option value="korean">한식</option>
-                <option value="western">양식</option>
-                <option value="japanese">일식</option>
-                <option value="snack">분식</option>
-            </select>
+        <ol class="steps" aria-label="메뉴 추천 진행 단계">
+            <li aria-current="step">1 시작</li>
+            <li>2 취향 선택</li>
+            <li>3 확인</li>
+            <li>4 완료</li>
+        </ol>
 
-            <label for="email">이메일</label>
-            <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="예: name@example.com"
-                pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                aria-describedby="emailHint"
-                required
-            >
-            <button id="recommendButton" type="submit" disabled>추천받기</button>
-            <p id="emailHint"></p>
-        </form>
+        <div class="flow-panel" id="step-start">
+            <h3 tabindex="-1">오늘은 무엇을 먹을까요?</h3>
+            <button type="button" id="startButton">추천 시작</button>
+        </div>
 
-        <p id="recommendMessage" aria-live="polite">음식 종류를 고르고 이메일을 입력한 뒤 추천받기를 눌러 주세요.</p>
+        <div class="flow-panel" id="step-select" hidden>
+            <h3 tabindex="-1">어떤 음식이 좋으세요?</h3>
+            <form id="recommend-form" novalidate>
+                <label for="category">음식 종류 (필수)</label>
+                <select id="category" name="category" aria-describedby="categoryHint" required>
+                    <option value="">음식 종류를 선택해 주세요</option>
+                    <option value="all">상관없음</option>
+                    <option value="korean">한식</option>
+                    <option value="western">양식</option>
+                    <option value="japanese">일식</option>
+                    <option value="snack">분식</option>
+                </select>
+                <p id="categoryHint" class="field-hint" hidden>음식 종류를 선택해 주세요.</p>
+
+                <label for="spicy">매운맛 선호 (필수)</label>
+                <select id="spicy" name="spicy" aria-describedby="spicyHint" required>
+                    <option value="">매운맛 선호를 선택해 주세요</option>
+                    <option value="all">상관없음</option>
+                    <option value="mild">매운 음식 제외</option>
+                    <option value="hot">매운 음식 선호</option>
+                </select>
+                <p id="spicyHint" class="field-hint" hidden>매운맛 선호를 선택해 주세요.</p>
+
+                <div class="flow-buttons">
+                    <button type="button" id="previousButton" class="secondary">이전</button>
+                    <button type="submit">다음</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="flow-panel" id="step-confirm" hidden>
+            <h3 tabindex="-1">선택한 취향을 확인해 주세요</h3>
+            <dl class="selection-summary">
+                <dt>음식 종류</dt>
+                <dd id="categorySummary"></dd>
+                <dt>매운맛 선호</dt>
+                <dd id="spicySummary"></dd>
+            </dl>
+            <p id="noResultMessage" class="field-hint" role="alert" hidden>맞는 메뉴가 없어요. ‘수정하기’에서 조건을 바꿔 주세요.</p>
+            <div class="flow-buttons">
+                <button type="button" id="editButton" class="secondary">수정하기</button>
+                <button type="button" id="recommendButton">추천받기</button>
+            </div>
+        </div>
+
+        <div class="flow-panel" id="step-complete" hidden>
+            <h3 tabindex="-1">메뉴 추천이 완료되었어요!</h3>
+            <p id="completedSummary"></p>
+            <p id="recommendMessage" class="is-success"></p>
+            <button type="button" id="restartButton">다시 시작</button>
+        </div>
     </section>
 
 </main>
 
 <footer>
-    <p>오늘뭐먹지 - 메뉴 고민을 간단하게 해결해보세요.</p>
+    <p>오늘뭐먹지</p>
 </footer>
 
 <script src="script.js"></script>

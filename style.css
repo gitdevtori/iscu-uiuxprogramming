@@ -175,39 +175,10 @@ label {
     font-weight: bold;
 }
 
-input {
-    box-sizing: border-box;
-    width: 70%;
-    padding: 7px 10px;
-    font-size: 14px;
-    border: 1px solid #dddddd;
-    border-radius: 5px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-input:focus {
-    outline: none;
-    border-color: #ff7a45;
-    box-shadow: 0 0 0 3px #ffd8c7;
-}
-
-input.is-invalid {
-    border-color: #e57373;
-}
-
-#emailHint {
-    margin: 6px 0 0;
-    font-size: 13px;
-    color: #888888;
-}
-
-#emailHint.is-invalid {
-    color: #c62828;
-}
-
 select {
+    min-height: 44px;
     box-sizing: border-box;
-    width: 70%;
+    width: 100%;
     margin-bottom: 15px;
     padding: 7px 10px;
     font-size: 14px;
@@ -223,6 +194,7 @@ select:focus {
 }
 
 button {
+    min-height: 44px;
     padding: 7px 14px;
     font-size: 14px;
     color: #ffffff;
@@ -269,14 +241,71 @@ button:disabled {
     font-weight: bold;
 }
 
-#recommendMessage.is-error {
-    background-color: #fdecec;
-    color: #c62828;
+/* 추천 진행 단계와 선택 확인 */
+.steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 0;
+    list-style: none;
 }
 
-#recommendMessage.is-info {
-    background-color: #fff8e1;
-    color: #8a5a00;
+.steps li {
+    padding: 10px 4px;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+    text-align: center;
+    font-size: 14px;
+}
+
+.steps li[aria-current="step"] {
+    background-color: #ff7a45;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.flow-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.secondary {
+    color: #c4501f;
+    background-color: #fff4ee;
+    border: 1px solid #ffd8c7;
+}
+
+.secondary:hover {
+    background-color: #ffeadf;
+}
+
+.field-hint {
+    margin-bottom: 15px;
+    color: #c62828;
+    font-size: 14px;
+}
+
+select.is-invalid {
+    border-color: #c62828;
+}
+
+.selection-summary {
+    padding: 15px;
+    background-color: #fff4ee;
+    border-radius: 8px;
+}
+
+.selection-summary dt {
+    font-weight: bold;
+}
+
+.selection-summary dd {
+    margin: 0 0 10px;
+}
+
+#restartButton {
+    margin-top: 20px;
 }
 
 /* 푸터 */
@@ -338,14 +367,12 @@ footer p {
         grid-template-columns: 1fr;
     }
 
-    input,
     button {
         box-sizing: border-box;
         display: block;
         width: 100%;
     }
 
-    input,
     select {
         width: 100%;
         padding: 10px;
@@ -356,5 +383,16 @@ footer p {
         margin-top: 10px;
         padding: 10px;
         font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .steps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .flow-buttons {
+        flex-direction: column;
+        gap: 0;
     }
 }

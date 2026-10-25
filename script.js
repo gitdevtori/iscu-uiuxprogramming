@@ -18,7 +18,21 @@ const emailInput = document.querySelector("#email");
 const emailHint = document.querySelector("#emailHint");
 const emailButton = document.querySelector("#emailButton");
 const emailMessage = document.querySelector("#emailMessage");
+const favoriteButton = document.querySelector("#favoriteButton");
+const favoriteMessage = document.querySelector("#favoriteMessage");
+const favoritesTitle = document.querySelector("#favoritesTitle");
+const favoriteCount = document.querySelector("#favoriteCount");
+const favoriteList = document.querySelector("#favoriteList");
+const emptyFavorites = document.querySelector("#emptyFavorites");
+const favoritesMessage = document.querySelector("#favoritesMessage");
+const storageMessage = document.querySelector("#storageMessage");
+const favoriteDetail = document.querySelector("#favorite-detail");
+const favoriteDetailTitle = document.querySelector("#favoriteDetailTitle");
+const favoriteDetailSummary = document.querySelector("#favoriteDetailSummary");
+const favoriteStorageKey = "today-menu-favorites";
 let currentStep = 0;
+let currentRecommendation = null;
+let favorites = [];
 
 // 종류별 추천 메뉴와 매운맛 정보
 const menus = {
@@ -160,12 +174,19 @@ function handleRecommend() {
     }
 
     const index = Math.floor(Math.random() * foods.length);
+    currentRecommendation = {
+        name: foods[index].name,
+        category: categorySelect.value,
+        spicy: spicySelect.value
+    };
     completedSummary.textContent = categoryNames[categorySelect.value] + " · " + spicyNames[spicySelect.value];
     recommendMessage.textContent = "오늘의 추천 메뉴는 \"" + foods[index].name + "\"입니다.";
+    favoriteMessage.textContent = "";
+    updateFavoriteButton();
     showStep(3);
 }
 
-// 다시 시작하면 선택값, 안내 문구, 오류, 진행 상태를 모두 초기화하는 함수
+// 다시 시작하면 현재 추천만 초기화하고 찜 목록은 유지하는 함수
 function handleRestart() {
     recommendForm.reset();
     emailForm.reset();
@@ -181,7 +202,145 @@ function handleRestart() {
     spicySummary.textContent = "";
     completedSummary.textContent = "";
     recommendMessage.textContent = "";
+    currentRecommendation = null;
+    favoriteMessage.textContent = "";
+    favoritesMessage.textContent = "";
+    renderFavorites();
     showStep(0);
+}
+
+// 브라우저에 저장한 찜 목록을 읽고 메뉴와 선택값이 올바른지 확인하는 함수
+function loadFavorites() {
+    try {
+        const savedFavorites = JSON.parse(localStorage.getItem(favoriteStorageKey) || "[]");
+        const isValid = Array.isArray(savedFavorites) && savedFavorites.every(function (favorite) {
+            return favorite !== null &&
+                Object.keys(categoryNames).includes(favorite.category) &&
+                Object.keys(spicyNames).includes(favorite.spicy) &&
+                getFoods(favorite.category, favorite.spicy).some(function (food) {
+                    return food.name === favorite.name;
+                });
+        });
+        if (!isValid) {
+            throw new Error("저장한 메뉴 정보가 올바르지 않습니다.");
+        }
+        favorites = savedFavorites;
+    } catch (error) {
+        storageMessage.textContent = "찜 목록을 불러오지 못했어요. 새로고침하거나 메뉴를 다시 찜해 주세요.";
+        storageMessage.hidden = false;
+    }
+}
+
+// 저장에 성공했을 때만 찜 목록을 바꾸는 함수
+function saveFavorites(nextFavorites) {
+    try {
+        localStorage.setItem(favoriteStorageKey, JSON.stringify(nextFavorites));
+        favorites = nextFavorites;
+        storageMessage.textContent = "";
+        storageMessage.hidden = true;
+        return true;
+    } catch (error) {
+        storageMessage.textContent = "변경 내용을 저장하지 못했어요. 브라우저 저장 설정을 확인하고 다시 눌러 주세요.";
+        storageMessage.hidden = false;
+        return false;
+    }
+}
+
+// 같은 메뉴는 한 번만 찜할 수 있도록 버튼 상태를 바꾸는 함수
+function updateFavoriteButton() {
+    const isSaved = currentRecommendation !== null && favorites.some(function (favorite) {
+        return favorite.name === currentRecommendation.name;
+    });
+    favoriteButton.disabled = currentRecommendation === null || isSaved;
+    favoriteButton.textContent = isSaved ? "찜한 메뉴" : "이 메뉴 찜하기";
+}
+
+// 찜 목록과 개수를 갱신하고, 비어 있으면 추천 시작을 안내하는 함수
+function renderFavorites() {
+    favoriteList.textContent = "";
+    favoriteList.hidden = false;
+    favoriteDetail.hidden = true;
+    favoriteCount.textContent = favorites.length;
+    emptyFavorites.hidden = favorites.length !== 0;
+
+    favorites.forEach(function (favorite) {
+        const item = document.createElement("li");
+        const title = document.createElement("h3");
+        const summary = document.createElement("p");
+        const buttons = document.createElement("div");
+        const viewButton = document.createElement("button");
+        const removeButton = document.createElement("button");
+
+        title.textContent = favorite.name;
+        summary.textContent = "선택한 취향: " + categoryNames[favorite.category] + " · " + spicyNames[favorite.spicy];
+        buttons.className = "flow-buttons";
+        viewButton.type = "button";
+        viewButton.textContent = "다시 보기";
+        viewButton.setAttribute("aria-label", favorite.name + " 다시 보기");
+        viewButton.addEventListener("click", function () {
+            showFavorite(favorite);
+        });
+        removeButton.type = "button";
+        removeButton.className = "secondary";
+        removeButton.textContent = "찜 해제";
+        removeButton.setAttribute("aria-label", favorite.name + " 찜 해제");
+        removeButton.addEventListener("click", function () {
+            removeFavorite(favorite.name);
+        });
+
+        buttons.appendChild(viewButton);
+        buttons.appendChild(removeButton);
+        item.appendChild(title);
+        item.appendChild(summary);
+        item.appendChild(buttons);
+        favoriteList.appendChild(item);
+    });
+    updateFavoriteButton();
+}
+
+// 추천 결과를 찜 목록에 추가하고 저장 결과를 안내하는 함수
+function handleFavorite() {
+    if (currentStep !== 3 || currentRecommendation === null) {
+        return;
+    }
+    const isSaved = favorites.some(function (favorite) {
+        return favorite.name === currentRecommendation.name;
+    });
+    if (isSaved) {
+        favoriteMessage.textContent = "이미 찜한 메뉴예요. 찜한 메뉴 목록에서 다시 볼 수 있어요.";
+        return;
+    }
+    if (!saveFavorites(favorites.concat(currentRecommendation))) {
+        favoriteMessage.textContent = storageMessage.textContent;
+        return;
+    }
+    renderFavorites();
+    favoritesMessage.textContent = "";
+    favoriteMessage.textContent = "\"" + currentRecommendation.name + "\" 메뉴를 찜했어요. 찜한 메뉴 보기에서 확인해 주세요.";
+}
+
+// 새 추천을 실행하지 않고 찜할 당시의 메뉴와 선택값을 보여주는 함수
+function showFavorite(favorite) {
+    favoriteDetailTitle.textContent = favorite.name;
+    favoriteDetailSummary.textContent = categoryNames[favorite.category] + " · " + spicyNames[favorite.spicy];
+    favoriteList.hidden = true;
+    favoriteDetail.hidden = false;
+    favoritesMessage.textContent = "";
+    favoriteDetailTitle.focus();
+}
+
+// 찜한 메뉴를 해제하고 완료 화면의 찜 버튼도 함께 갱신하는 함수
+function removeFavorite(name) {
+    const nextFavorites = favorites.filter(function (favorite) {
+        return favorite.name !== name;
+    });
+    if (!saveFavorites(nextFavorites)) {
+        return;
+    }
+    renderFavorites();
+    favoriteMessage.textContent = "";
+    favoritesMessage.textContent = name + " 찜을 해제했어요.";
+    favoritesTitle.focus();
 }
 
 // 이메일 형식을 검사하고 안내 문구와 버튼 상태를 바꾸는 함수
@@ -227,6 +386,19 @@ function handleEmailSubmit(event) {
 }
 
 emailInput.addEventListener("input", handleEmailInput);
+favoriteButton.addEventListener("click", handleFavorite);
+document.querySelector("#viewFavoritesButton").addEventListener("click", function () {
+    renderFavorites();
+    favoritesTitle.focus();
+});
+document.querySelector("#backToFavoritesButton").addEventListener("click", function () {
+    favoriteDetail.hidden = true;
+    favoriteList.hidden = false;
+    favoritesTitle.focus();
+});
+document.querySelector("#emptyRecommendButton").addEventListener("click", function () {
+    showStep(currentStep === 0 ? 1 : currentStep);
+});
 emailForm.addEventListener("submit", handleEmailSubmit);
 recommendForm.addEventListener("submit", handleSubmit);
 document.querySelector("#startButton").addEventListener("click", function () {
@@ -250,3 +422,6 @@ spicySelect.addEventListener("change", function () {
 tabButtons.forEach(function (tab) {
     tab.addEventListener("click", handleTabClick);
 });
+
+loadFavorites();
+renderFavorites();

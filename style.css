@@ -311,6 +311,38 @@ select.is-invalid {
     margin-top: 20px;
 }
 
+/* 찜한 메뉴 목록과 저장 결과 */
+.favorite-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.favorite-list li {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #fff4ee;
+    border: 1px solid #ffd8c7;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+.favorite-list h3 {
+    margin-top: 0;
+}
+
+.favorite-message {
+    margin-top: 12px;
+    color: #c4501f;
+    overflow-wrap: anywhere;
+}
+
+#favorite-detail {
+    padding: 15px;
+    background-color: #fdf8f3;
+    border-radius: 8px;
+}
+
 /* 푸터 */
 footer {
     background-color: #333333;

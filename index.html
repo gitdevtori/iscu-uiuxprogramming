@@ -13,8 +13,8 @@
 <!--
 사용자: 매일 무엇을 먹을지 고민하는 사람
 목적: 메뉴 고민 시간을 줄이고 간단하게 음식을 추천받기
-핵심 행동: 음식 종류와 매운맛 선호를 선택하고 메뉴를 추천받기
-정보 순서: 서비스 소개 → 주요 기능 → 이용 방법 → 메뉴 추천
+핵심 행동: 취향에 맞는 메뉴를 추천받고, 마음에 드는 메뉴를 찜해 다시 보기
+정보 순서: 서비스 소개 → 주요 기능 → 이용 방법 → 메뉴 추천 → 찜한 메뉴
 -->
 
 <header>
@@ -26,6 +26,7 @@
         <a href="#features">주요 기능</a>
         <a href="#howto">이용 방법</a>
         <a href="#recommend">메뉴 둘러보기</a>
+        <a href="#favorites">찜한 메뉴</a>
     </nav>
 </header>
 
@@ -52,8 +53,8 @@
             </li>
 
             <li>
-                <h3>간단한 이용</h3>
-                복잡한 과정 없이 간단한 선택만으로 이용할 수 있습니다.
+                <h3>메뉴 찜하기</h3>
+                마음에 드는 추천 메뉴를 저장하고 다음 식사 때 다시 확인할 수 있습니다.
             </li>
         </ul>
     </section>
@@ -66,6 +67,7 @@
             <li>원하는 음식 종류와 매운맛 선호를 선택합니다.</li>
             <li>선택한 내용을 확인하고 추천받기 버튼을 누릅니다.</li>
             <li>추천된 메뉴를 확인합니다. 다시 고르고 싶다면 다시 시작을 누릅니다.</li>
+            <li>마음에 드는 메뉴는 찜하고, 찜한 메뉴 목록에서 다시 보거나 찜을 해제합니다.</li>
         </ol>
     </section>
 
@@ -186,6 +188,11 @@
             <h3 tabindex="-1">메뉴 추천이 완료되었어요!</h3>
             <p id="completedSummary"></p>
             <p id="recommendMessage" class="is-success"></p>
+            <div class="flow-buttons">
+                <button type="button" id="favoriteButton">이 메뉴 찜하기</button>
+                <button type="button" id="viewFavoritesButton" class="secondary">찜한 메뉴 보기</button>
+            </div>
+            <p id="favoriteMessage" class="favorite-message" role="status"></p>
             <form id="email-form" novalidate>
                 <label for="email">기록한 취향에 맞게 메뉴를 계속 추천해드릴까요?</label>
                 <input
@@ -203,6 +210,27 @@
                 <p id="emailMessage" role="status"></p>
             </form>
             <button type="button" id="restartButton">다시 시작</button>
+        </div>
+    </section>
+
+    <section id="favorites">
+        <h2 id="favoritesTitle" tabindex="-1">찜한 메뉴 (<span id="favoriteCount">0</span>)</h2>
+        <p>찜한 메뉴는 이 브라우저에 저장되며, 다시 시작해도 유지됩니다.</p>
+        <p id="storageMessage" class="field-hint" role="status" hidden></p>
+        <p id="favoritesMessage" class="favorite-message" role="status"></p>
+
+        <div id="emptyFavorites">
+            <p>아직 찜한 메뉴가 없어요. 메뉴를 추천받고 마음에 드는 메뉴를 찜해 보세요.</p>
+            <button type="button" id="emptyRecommendButton">메뉴 추천받기</button>
+        </div>
+
+        <ul id="favoriteList" class="favorite-list"></ul>
+
+        <div id="favorite-detail" hidden>
+            <h3 id="favoriteDetailTitle" tabindex="-1"></h3>
+            <p>찜할 때 선택한 취향이에요.</p>
+            <p id="favoriteDetailSummary" class="selection-summary"></p>
+            <button type="button" id="backToFavoritesButton" class="secondary">목록으로 돌아가기</button>
         </div>
     </section>
 

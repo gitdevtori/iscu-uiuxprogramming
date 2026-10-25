@@ -12,19 +12,21 @@ const tabPanels = document.querySelectorAll(".tab-panel");
 const menus = {
     korean: ["김치찌개", "된장찌개", "순두부찌개", "비빔밥", "제육볶음"],
     western: ["파스타", "피자", "햄버거", "돈가스", "오므라이스"],
+    japanese: ["초밥", "우동", "소바", "규동", "매운 라멘"],
     snack: ["떡볶이", "김밥", "라면", "순대", "튀김"]
 };
 const categoryNames = {
     all: "전체",
     korean: "한식",
     western: "양식",
+    japanese: "일식",
     snack: "분식"
 };
 
 // 선택한 음식 종류에 맞는 메뉴 목록을 돌려주는 함수
 function getFoods(category) {
     if (category === "all") {
-        return menus.korean.concat(menus.western, menus.snack);
+        return menus.korean.concat(menus.western, menus.japanese, menus.snack);
     }
 
     return menus[category];

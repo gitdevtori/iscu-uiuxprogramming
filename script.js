@@ -10,7 +10,7 @@ const completedSummary = document.querySelector("#completedSummary");
 const recommendMessage = document.querySelector("#recommendMessage");
 const noResultMessage = document.querySelector("#noResultMessage");
 const flowPanels = document.querySelectorAll(".flow-panel");
-const steps = document.querySelectorAll(".steps li");
+const steps = document.querySelectorAll("#input .steps li");
 const tabButtons = document.querySelectorAll(".tab");
 const tabPanels = document.querySelectorAll(".tab-panel");
 const emailForm = document.querySelector("#email-form");
@@ -425,3 +425,279 @@ tabButtons.forEach(function (tab) {
 
 loadFavorites();
 renderFavorites();
+
+// 오늘의 식사 기록에 필요한 요소 선택
+const mealForm = document.querySelector("#meal-form");
+const mealStartButton = document.querySelector("#mealStartButton");
+const mealViewButton = document.querySelector("#mealViewButton");
+const mealRecordsPanel = document.querySelector("#mealRecordsPanel");
+const mealCancelButton = document.querySelector("#mealCancelButton");
+const mealRecordsTitle = document.querySelector("#mealRecordsTitle");
+const mealSteps = document.querySelectorAll(".meal-steps li");
+const mealNameInput = document.querySelector("#mealName");
+const mealRatingField = document.querySelector("#mealRating");
+const mealRatingInputs = document.querySelectorAll("input[name=mealRating]");
+const mealNameStatus = document.querySelector("#mealNameStatus");
+const mealReasonStatus = document.querySelector("#mealReasonStatus");
+const mealReasonArea = document.querySelector("#mealReasonArea");
+const mealReasonInput = document.querySelector("#mealReason");
+const mealSubmitButton = document.querySelector("#mealSubmitButton");
+const mealResetButton = document.querySelector("#mealResetButton");
+const mealMessage = document.querySelector("#mealMessage");
+const mealRecordsList = document.querySelector("#mealRecords");
+const emptyMeals = document.querySelector("#emptyMeals");
+const mealStorageKey = "today-meal-records";
+const mealRatingNames = {
+    good: "좋았어요",
+    normal: "보통이에요",
+    bad: "아쉬웠어요"
+};
+let mealRecords = [];
+let isMealSubmitting = false;
+
+// 시작, 입력, 기록 보기 중 현재 단계에 해당하는 영역만 표시하는 함수
+function showMealStep(step) {
+    const isOpen = step === 1;
+    mealSteps.forEach(function (item, index) {
+        if (index === step) {
+            item.setAttribute("aria-current", "step");
+        } else {
+            item.removeAttribute("aria-current");
+        }
+    });
+    mealForm.hidden = !isOpen;
+    mealRecordsPanel.hidden = step !== 2;
+    mealViewButton.hidden = step !== 0;
+    mealStartButton.hidden = isOpen;
+    mealStartButton.setAttribute("aria-expanded", isOpen);
+    setMealSubmitting(false);
+    if (isOpen) {
+        mealNameInput.focus();
+    } else if (step === 2) {
+        mealRecordsTitle.focus();
+    } else {
+        mealStartButton.focus();
+    }
+}
+
+// 선택한 만족도를 읽는 함수
+function getMealRating() {
+    const selected = document.querySelector("input[name=mealRating]:checked");
+    return selected ? selected.value : "";
+}
+
+// 입력 중에는 오류 대신 작은 상태 배지로 글자 수와 충족 여부를 표시
+function updateMealStatus(input, status, minimum, maximum) {
+    const length = input.value.trim().length;
+    const isValid = length >= minimum && length <= maximum;
+    status.hidden = length === 0;
+    status.classList.toggle("is-complete", isValid);
+    status.textContent = length + " / " + maximum + "자";
+}
+
+// 저장할 때 입력 길이를 검사하는 함수
+function validateMealText(input, minimum, maximum) {
+    const length = input.value.trim().length;
+    const isValid = length >= minimum && length <= maximum;
+    input.classList.toggle("is-invalid", !isValid);
+    input.setAttribute("aria-invalid", !isValid);
+    return isValid;
+}
+
+// 아쉬웠어요를 선택한 경우에만 이유를 표시하고 입력을 활성화하는 함수
+function toggleMealReason() {
+    mealReasonArea.hidden = getMealRating() !== "bad";
+    mealReasonInput.disabled = getMealRating() !== "bad";
+    mealMessage.textContent = "";
+}
+
+// 저장된 식사 기록을 안전하게 텍스트로 표시하는 함수
+function renderMealRecords() {
+    mealRecordsList.textContent = "";
+    emptyMeals.hidden = mealRecords.length !== 0;
+    mealRecords.forEach(function (meal, index) {
+        const item = document.createElement("li");
+        const title = document.createElement("h3");
+        const description = document.createElement("p");
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "ghost";
+        deleteButton.textContent = "삭제";
+        deleteButton.disabled = isMealSubmitting;
+        deleteButton.setAttribute("aria-label", meal.name + " 식사 기록 삭제");
+        deleteButton.addEventListener("click", function () {
+            removeMealRecord(index);
+        });
+        title.textContent = meal.name;
+        description.textContent = mealRatingNames[meal.rating] + (meal.reason ? " · " + meal.reason : "");
+        item.appendChild(title);
+        item.appendChild(description);
+        item.appendChild(deleteButton);
+        mealRecordsList.appendChild(item);
+    });
+}
+
+// 선택한 기록만 삭제하고 저장에 실패하면 기존 목록을 유지하는 함수
+function removeMealRecord(index) {
+    if (isMealSubmitting) {
+        return;
+    }
+    const nextMeals = mealRecords.filter(function (meal, mealIndex) {
+        return mealIndex !== index;
+    });
+    try {
+        localStorage.setItem(mealStorageKey, JSON.stringify(nextMeals));
+        const name = mealRecords[index].name;
+        mealRecords = nextMeals;
+        renderMealRecords();
+        mealMessage.textContent = "\"" + name + "\" 식사 기록을 삭제했어요.";
+        mealRecordsTitle.focus();
+    } catch (error) {
+        mealMessage.textContent = "삭제하지 못했어요. 기록은 유지됩니다. 브라우저 저장 공간과 설정을 확인한 후 다시 시도해 주세요.";
+    }
+}
+
+// 새로고침 후에도 식사 기록을 복원하는 함수
+function loadMealRecords() {
+    try {
+        const savedMeals = JSON.parse(localStorage.getItem(mealStorageKey) || "[]");
+        const isValid = Array.isArray(savedMeals) && savedMeals.every(function (meal) {
+            return meal !== null && typeof meal.name === "string" &&
+                Object.keys(mealRatingNames).includes(meal.rating) &&
+                typeof meal.reason === "string";
+        });
+        if (!isValid) {
+            throw new Error("저장 데이터 오류");
+        }
+        mealRecords = savedMeals;
+    } catch (error) {
+        mealMessage.textContent = "식사 기록을 불러오지 못했어요. 브라우저 저장 설정을 확인해 주세요.";
+    }
+    renderMealRecords();
+}
+
+// 제출 중 입력과 버튼을 잠가 중복 저장을 막는 함수
+function setMealSubmitting(isSubmitting) {
+    isMealSubmitting = isSubmitting;
+    mealNameInput.disabled = isSubmitting || mealForm.hidden;
+    mealRatingField.disabled = isSubmitting || mealForm.hidden;
+    mealReasonInput.disabled = isSubmitting || mealForm.hidden || getMealRating() !== "bad";
+    mealSubmitButton.disabled = isSubmitting;
+    mealResetButton.disabled = isSubmitting;
+    mealCancelButton.disabled = isSubmitting;
+    mealRecordsList.querySelectorAll("button").forEach(function (button) {
+        button.disabled = isSubmitting;
+    });
+    mealSubmitButton.textContent = isSubmitting ? "저장 중…" : "식사 기록 저장";
+    mealForm.setAttribute("aria-busy", isSubmitting);
+}
+
+// 입력 검사 후 브라우저에 저장하고 실패하면 입력값을 유지하는 함수
+function handleMealSubmit(event) {
+    event.preventDefault();
+    if (isMealSubmitting || mealForm.hidden) {
+        return;
+    }
+    const nameValid = validateMealText(mealNameInput, 2, 30);
+    const ratingValid = getMealRating() !== "";
+    mealRatingField.classList.toggle("is-invalid", !ratingValid);
+    mealRatingField.setAttribute("aria-invalid", !ratingValid);
+    const reasonValid = getMealRating() !== "bad" || validateMealText(mealReasonInput, 10, 100);
+    if (!nameValid || !ratingValid || !reasonValid) {
+        mealMessage.textContent = [
+            !nameValid ? "먹은 메뉴를 2~30자로 입력해 주세요." : "",
+            !ratingValid ? "만족도를 선택해 주세요." : "",
+            !reasonValid ? "아쉬웠던 이유를 10~100자로 입력해 주세요." : ""
+        ].filter(Boolean).join(" ");
+        if (!nameValid) {
+            mealNameInput.focus();
+        } else if (!ratingValid) {
+            mealRatingInputs[0].focus();
+        } else {
+            mealReasonInput.focus();
+        }
+        return;
+    }
+    const meal = {
+        name: mealNameInput.value.trim(),
+        rating: getMealRating(),
+        reason: getMealRating() === "bad" ? mealReasonInput.value.trim() : ""
+    };
+    setMealSubmitting(true);
+    mealMessage.textContent = "식사 기록을 저장하고 있어요. 잠시 기다려 주세요.";
+    // 저장 진행 상태를 확인할 수 있도록 잠시 기다린 뒤 저장
+    window.setTimeout(function () {
+        try {
+            const nextMeals = mealRecords.concat(meal);
+            localStorage.setItem(mealStorageKey, JSON.stringify(nextMeals));
+            mealRecords = nextMeals;
+            renderMealRecords();
+            setMealSubmitting(false);
+            mealForm.reset();
+            showMealStep(2);
+            mealMessage.textContent = "\"" + meal.name + "\" 식사를 기록했어요. 아래 목록에서 확인해 주세요.";
+        } catch (error) {
+            setMealSubmitting(false);
+            mealMessage.textContent = "저장하지 못했어요. 입력 내용은 유지됩니다. 브라우저 저장 공간과 설정을 확인한 후 다시 저장해 주세요.";
+        }
+    }, 700);
+}
+
+// 다시 작성하면 입력값과 안내 문구, 조건부 영역을 함께 초기화하는 함수
+function handleMealReset(event) {
+    if (isMealSubmitting) {
+        event.preventDefault();
+        return;
+    }
+    [mealNameInput, mealRatingField, mealReasonInput].forEach(function (input) {
+        input.classList.remove("is-invalid");
+        input.removeAttribute("aria-invalid");
+    });
+    mealNameStatus.hidden = true;
+    mealReasonStatus.hidden = true;
+    mealNameStatus.textContent = "";
+    mealReasonStatus.textContent = "";
+    mealNameStatus.classList.remove("is-complete");
+    mealReasonStatus.classList.remove("is-complete");
+    mealReasonArea.hidden = true;
+    setMealSubmitting(false);
+    mealReasonInput.disabled = true;
+    mealMessage.textContent = "";
+}
+
+// 입력을 수정하면 이전 오류만 지우고, 검사는 저장 시 실행
+[mealNameInput, mealRatingField, mealReasonInput].forEach(function (input) {
+    input.addEventListener("input", function () {
+        input.classList.remove("is-invalid");
+        input.removeAttribute("aria-invalid");
+        mealMessage.textContent = "";
+    });
+});
+mealNameInput.addEventListener("input", function () {
+    updateMealStatus(mealNameInput, mealNameStatus, 2, 30);
+});
+mealReasonInput.addEventListener("input", function () {
+    updateMealStatus(mealReasonInput, mealReasonStatus, 10, 100);
+});
+mealRatingInputs.forEach(function (input) {
+    input.addEventListener("change", toggleMealReason);
+});
+mealForm.addEventListener("submit", handleMealSubmit);
+mealForm.addEventListener("reset", handleMealReset);
+mealViewButton.addEventListener("click", function () {
+    mealMessage.textContent = "";
+    showMealStep(2);
+});
+mealStartButton.addEventListener("click", function () {
+    mealForm.reset();
+    showMealStep(1);
+});
+mealCancelButton.addEventListener("click", function () {
+    if (isMealSubmitting) {
+        return;
+    }
+    mealForm.reset();
+    showMealStep(0);
+});
+loadMealRecords();
+setMealSubmitting(false);

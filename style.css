@@ -1,4 +1,8 @@
 /* 기본 설정 */
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     background-color: #fdf8f3;
@@ -176,6 +180,7 @@ label {
 }
 
 input,
+textarea,
 select {
     min-height: 44px;
     box-sizing: border-box;
@@ -189,6 +194,7 @@ select {
 }
 
 input:focus,
+textarea:focus,
 select:focus {
     outline: none;
     border-color: #ff7a45;
@@ -282,6 +288,21 @@ button:disabled {
     background-color: #ffeadf;
 }
 
+.ghost {
+    color: #c4501f;
+    background-color: transparent;
+    font-weight: bold;
+}
+
+.ghost:hover {
+    background-color: #ffeadf;
+}
+
+.ghost:disabled {
+    color: #999999;
+    background-color: transparent;
+}
+
 .field-hint {
     margin-bottom: 15px;
     color: #c62828;
@@ -289,6 +310,7 @@ button:disabled {
 }
 
 input.is-invalid,
+textarea.is-invalid,
 select.is-invalid {
     border-color: #c62828;
 }
@@ -452,4 +474,128 @@ footer p {
     margin-top: 12px;
     color: #c4501f;
     overflow-wrap: anywhere;
+}
+
+/* 오늘의 식사 기록 */
+#mealRecords {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+#mealRecords li {
+    min-width: 0;
+    margin-top: 0;
+}
+
+@media (max-width: 768px) {
+    #mealRecords {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    #mealRecords li {
+        padding: 12px;
+    }
+}
+
+.meal-steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid #dddddd;
+}
+
+.meal-steps li {
+    margin-bottom: -1px;
+    padding: 12px 4px;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background-color: transparent;
+    color: #666666;
+}
+
+.meal-steps li[aria-current="step"] {
+    border-bottom-color: #ff7a45;
+    background-color: transparent;
+    color: #c4501f;
+    font-weight: bold;
+}
+
+textarea {
+    font-family: inherit;
+    resize: vertical;
+}
+
+#mealNameHelp,
+#mealRatingHelp,
+#mealReasonHelp {
+    color: #666666;
+    font-size: 14px;
+}
+
+.rating-field {
+    min-width: 0;
+    margin: 20px 0;
+    padding: 0;
+    border: 0;
+}
+
+.rating-field legend {
+    margin-bottom: 8px;
+    padding: 0;
+    font-weight: bold;
+}
+
+.rating-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.rating-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.rating-options label:has(input:checked) {
+    color: #c4501f;
+    background-color: #fff4ee;
+    border-color: #ff7a45;
+}
+
+.rating-options input {
+    width: 16px;
+    height: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    accent-color: #ff7a45;
+}
+
+.rating-field.is-invalid .rating-options label {
+    border-color: #c62828;
+}
+
+.input-status {
+    width: fit-content;
+    margin: -4px 0 16px auto;
+    padding: 3px 10px;
+    color: #666666;
+    background-color: #f5f5f5;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.input-status.is-complete {
+    color: #26713b;
+    background-color: #edf7ef;
 }

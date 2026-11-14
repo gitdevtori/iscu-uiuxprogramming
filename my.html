@@ -93,6 +93,13 @@
 
         <div id="mealRecordsPanel" hidden>
             <h3 id="mealRecordsTitle" tabindex="-1">내 식사 기록</h3>
+            <div class="filters" aria-label="만족도 필터">
+                <button type="button" class="filter is-active" data-filter="all" aria-pressed="true">전체</button>
+                <button type="button" class="filter" data-filter="good" aria-pressed="false">좋았어요</button>
+                <button type="button" class="filter" data-filter="normal" aria-pressed="false">보통이에요</button>
+                <button type="button" class="filter" data-filter="bad" aria-pressed="false">아쉬웠어요</button>
+            </div>
+            <p id="mealCount" role="status"></p>
             <p id="emptyMeals">아직 식사 기록이 없어요.</p>
             <ul id="mealRecords" class="favorite-list"></ul>
         </div>

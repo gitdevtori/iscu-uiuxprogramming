@@ -482,6 +482,8 @@ const mealResetButton = document.querySelector("#mealResetButton");
 const mealMessage = document.querySelector("#mealMessage");
 const mealRecordsList = document.querySelector("#mealRecords");
 const emptyMeals = document.querySelector("#emptyMeals");
+const mealCount = document.querySelector("#mealCount");
+const mealFilterButtons = document.querySelectorAll(".filter");
 const mealStorageKey = "today-meal-records";
 const mealRatingNames = {
     good: "좋았어요",
@@ -490,6 +492,7 @@ const mealRatingNames = {
 };
 let mealRecords = [];
 let isMealSubmitting = false;
+let mealFilter = "all";
 
 // 시작, 입력, 기록 보기 중 현재 단계에 해당하는 영역만 표시하는 함수
 function showMealStep(step) {
@@ -547,11 +550,15 @@ function toggleMealReason() {
     mealMessage.textContent = "";
 }
 
-// 저장된 식사 기록을 안전하게 텍스트로 표시하는 함수
+// 저장된 식사 기록 중 선택한 만족도에 맞는 것만 텍스트로 표시하는 함수
 function renderMealRecords() {
     mealRecordsList.textContent = "";
-    emptyMeals.hidden = mealRecords.length !== 0;
+    let shownCount = 0;
     mealRecords.forEach(function (meal, index) {
+        if (mealFilter !== "all" && meal.rating !== mealFilter) {
+            return;
+        }
+        shownCount = shownCount + 1;
         const item = document.createElement("li");
         const title = document.createElement("h3");
         const description = document.createElement("p");
@@ -571,6 +578,28 @@ function renderMealRecords() {
         item.appendChild(deleteButton);
         mealRecordsList.appendChild(item);
     });
+
+    // 전체 기록이 없는 경우와 필터 결과만 없는 경우를 나누어 안내
+    if (mealRecords.length === 0) {
+        emptyMeals.textContent = "아직 식사 기록이 없어요.";
+    } else if (shownCount === 0) {
+        emptyMeals.textContent = "‘" + mealRatingNames[mealFilter] + "’ 기록이 없어요.";
+    }
+    emptyMeals.hidden = shownCount !== 0;
+    mealCount.hidden = shownCount === 0;
+    mealCount.textContent = "전체 " + mealRecords.length + "개 중 " + shownCount + "개";
+}
+
+// 필터 버튼의 선택 표시와 aria-pressed를 바꾸고 목록을 다시 그리는 함수
+function handleMealFilter(event) {
+    mealFilter = event.currentTarget.dataset.filter;
+    mealFilterButtons.forEach(function (button) {
+        const isSelected = button.dataset.filter === mealFilter;
+        button.classList.toggle("is-active", isSelected);
+        button.setAttribute("aria-pressed", isSelected);
+    });
+    mealMessage.textContent = "";
+    renderMealRecords();
 }
 
 // 선택한 기록만 삭제하고 저장에 실패하면 기존 목록을 유지하는 함수
@@ -736,6 +765,9 @@ if (mealForm) {
         }
         mealForm.reset();
         showMealStep(0);
+    });
+    mealFilterButtons.forEach(function (button) {
+        button.addEventListener("click", handleMealFilter);
     });
     loadMealRecords();
     setMealSubmitting(false);

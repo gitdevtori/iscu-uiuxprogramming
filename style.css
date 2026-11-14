@@ -186,6 +186,34 @@ p {
     font-weight: bold;
 }
 
+/* 식사 기록 만족도 필터 (탭과 같은 모양) */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.filter {
+    flex: 1;
+    width: auto;
+    margin: 0;
+    color: #c4501f;
+    background-color: #fff4ee;
+    border: 1px solid #ffd8c7;
+}
+
+.filter:hover {
+    background-color: #ffeadf;
+}
+
+.filter.is-active {
+    color: #ffffff;
+    background-color: #ff7a45;
+    border-color: #ff7a45;
+    font-weight: bold;
+}
+
 .menu-list {
     display: flex;
     flex-wrap: wrap;
@@ -468,6 +496,10 @@ footer p {
 
     #features ul {
         grid-template-columns: 1fr;
+    }
+
+    .filter {
+        flex-basis: 40%;
     }
 
     button {

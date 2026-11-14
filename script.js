@@ -204,8 +204,7 @@ function handleRestart() {
     recommendMessage.textContent = "";
     currentRecommendation = null;
     favoriteMessage.textContent = "";
-    favoritesMessage.textContent = "";
-    renderFavorites();
+    updateFavoriteButton();
     showStep(0);
 }
 
@@ -257,6 +256,9 @@ function updateFavoriteButton() {
 
 // 찜 목록과 개수를 갱신하고, 비어 있으면 추천 시작을 안내하는 함수
 function renderFavorites() {
+    if (!favoriteList) {
+        return;
+    }
     favoriteList.textContent = "";
     favoriteList.hidden = false;
     favoriteDetail.hidden = true;
@@ -295,7 +297,6 @@ function renderFavorites() {
         item.appendChild(buttons);
         favoriteList.appendChild(item);
     });
-    updateFavoriteButton();
 }
 
 // 추천 결과를 찜 목록에 추가하고 저장 결과를 안내하는 함수
@@ -314,8 +315,7 @@ function handleFavorite() {
         favoriteMessage.textContent = storageMessage.textContent;
         return;
     }
-    renderFavorites();
-    favoritesMessage.textContent = "";
+    updateFavoriteButton();
     favoriteMessage.textContent = "\"" + currentRecommendation.name + "\" 메뉴를 찜했어요. 찜한 메뉴 보기에서 확인해 주세요.";
 }
 
@@ -338,7 +338,6 @@ function removeFavorite(name) {
         return;
     }
     renderFavorites();
-    favoriteMessage.textContent = "";
     favoritesMessage.textContent = name + " 찜을 해제했어요.";
     favoritesTitle.focus();
 }
@@ -385,46 +384,53 @@ function handleEmailSubmit(event) {
     emailButton.disabled = true;
 }
 
-emailInput.addEventListener("input", handleEmailInput);
-favoriteButton.addEventListener("click", handleFavorite);
-document.querySelector("#viewFavoritesButton").addEventListener("click", function () {
-    renderFavorites();
-    favoritesTitle.focus();
-});
-document.querySelector("#backToFavoritesButton").addEventListener("click", function () {
-    favoriteDetail.hidden = true;
-    favoriteList.hidden = false;
-    favoritesTitle.focus();
-});
-document.querySelector("#emptyRecommendButton").addEventListener("click", function () {
-    showStep(currentStep === 0 ? 1 : currentStep);
-});
-emailForm.addEventListener("submit", handleEmailSubmit);
-recommendForm.addEventListener("submit", handleSubmit);
-document.querySelector("#startButton").addEventListener("click", function () {
-    showStep(1);
-});
-document.querySelector("#previousButton").addEventListener("click", function () {
-    showStep(0);
-});
-document.querySelector("#editButton").addEventListener("click", function () {
-    noResultMessage.hidden = true;
-    showStep(1);
-});
-document.querySelector("#recommendButton").addEventListener("click", handleRecommend);
-document.querySelector("#restartButton").addEventListener("click", handleRestart);
-categorySelect.addEventListener("change", function () {
-    validateSelection(categorySelect, categoryHint);
-});
-spicySelect.addEventListener("change", function () {
-    validateSelection(spicySelect, spicyHint);
-});
-tabButtons.forEach(function (tab) {
-    tab.addEventListener("click", handleTabClick);
-});
+// 메뉴 추천 페이지(recommend.html)
+if (recommendForm) {
+    emailInput.addEventListener("input", handleEmailInput);
+    favoriteButton.addEventListener("click", handleFavorite);
+    document.querySelector("#viewFavoritesButton").addEventListener("click", function () {
+        location.href = "my.html#favorites";
+    });
+    emailForm.addEventListener("submit", handleEmailSubmit);
+    recommendForm.addEventListener("submit", handleSubmit);
+    document.querySelector("#startButton").addEventListener("click", function () {
+        showStep(1);
+    });
+    document.querySelector("#previousButton").addEventListener("click", function () {
+        showStep(0);
+    });
+    document.querySelector("#editButton").addEventListener("click", function () {
+        noResultMessage.hidden = true;
+        showStep(1);
+    });
+    document.querySelector("#recommendButton").addEventListener("click", handleRecommend);
+    document.querySelector("#restartButton").addEventListener("click", handleRestart);
+    categorySelect.addEventListener("change", function () {
+        validateSelection(categorySelect, categoryHint);
+    });
+    spicySelect.addEventListener("change", function () {
+        validateSelection(spicySelect, spicyHint);
+    });
+    tabButtons.forEach(function (tab) {
+        tab.addEventListener("click", handleTabClick);
+    });
+    loadFavorites();
+    updateFavoriteButton();
+}
 
-loadFavorites();
-renderFavorites();
+// 내 기록 페이지(my.html)의 찜한 메뉴
+if (favoriteList) {
+    document.querySelector("#backToFavoritesButton").addEventListener("click", function () {
+        favoriteDetail.hidden = true;
+        favoriteList.hidden = false;
+        favoritesTitle.focus();
+    });
+    document.querySelector("#emptyRecommendButton").addEventListener("click", function () {
+        location.href = "recommend.html#input";
+    });
+    loadFavorites();
+    renderFavorites();
+}
 
 // 오늘의 식사 기록에 필요한 요소 선택
 const mealForm = document.querySelector("#meal-form");
@@ -665,39 +671,42 @@ function handleMealReset(event) {
     mealMessage.textContent = "";
 }
 
-// 입력을 수정하면 이전 오류만 지우고, 검사는 저장 시 실행
-[mealNameInput, mealRatingField, mealReasonInput].forEach(function (input) {
-    input.addEventListener("input", function () {
-        input.classList.remove("is-invalid");
-        input.removeAttribute("aria-invalid");
-        mealMessage.textContent = "";
+// 내 기록 페이지(my.html)의 식사 기록
+if (mealForm) {
+    // 입력을 수정하면 이전 오류만 지우고, 검사는 저장 시 실행
+    [mealNameInput, mealRatingField, mealReasonInput].forEach(function (input) {
+        input.addEventListener("input", function () {
+            input.classList.remove("is-invalid");
+            input.removeAttribute("aria-invalid");
+            mealMessage.textContent = "";
+        });
     });
-});
-mealNameInput.addEventListener("input", function () {
-    updateMealStatus(mealNameInput, mealNameStatus, 2, 30);
-});
-mealReasonInput.addEventListener("input", function () {
-    updateMealStatus(mealReasonInput, mealReasonStatus, 10, 100);
-});
-mealRatingInputs.forEach(function (input) {
-    input.addEventListener("change", toggleMealReason);
-});
-mealForm.addEventListener("submit", handleMealSubmit);
-mealForm.addEventListener("reset", handleMealReset);
-mealViewButton.addEventListener("click", function () {
-    mealMessage.textContent = "";
-    showMealStep(2);
-});
-mealStartButton.addEventListener("click", function () {
-    mealForm.reset();
-    showMealStep(1);
-});
-mealCancelButton.addEventListener("click", function () {
-    if (isMealSubmitting) {
-        return;
-    }
-    mealForm.reset();
-    showMealStep(0);
-});
-loadMealRecords();
-setMealSubmitting(false);
+    mealNameInput.addEventListener("input", function () {
+        updateMealStatus(mealNameInput, mealNameStatus, 2, 30);
+    });
+    mealReasonInput.addEventListener("input", function () {
+        updateMealStatus(mealReasonInput, mealReasonStatus, 10, 100);
+    });
+    mealRatingInputs.forEach(function (input) {
+        input.addEventListener("change", toggleMealReason);
+    });
+    mealForm.addEventListener("submit", handleMealSubmit);
+    mealForm.addEventListener("reset", handleMealReset);
+    mealViewButton.addEventListener("click", function () {
+        mealMessage.textContent = "";
+        showMealStep(2);
+    });
+    mealStartButton.addEventListener("click", function () {
+        mealForm.reset();
+        showMealStep(1);
+    });
+    mealCancelButton.addEventListener("click", function () {
+        if (isMealSubmitting) {
+            return;
+        }
+        mealForm.reset();
+        showMealStep(0);
+    });
+    loadMealRecords();
+    setMealSubmitting(false);
+}

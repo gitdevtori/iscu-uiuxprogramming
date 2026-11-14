@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 기록 - 오늘뭐먹지</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>오늘뭐먹지</h1>
+    <p>밥시간마다 찾아오는 고민, 뭐 먹을지 고민하는 시간을 해결합니다.</p>
+
+    <nav>
+        <a href="index.html">서비스 소개</a>
+        <a href="recommend.html">메뉴 추천받기</a>
+        <a href="my.html">내 기록</a>
+    </nav>
+</header>
+
+<main>
+
+    <section id="favorites">
+        <h2 id="favoritesTitle" tabindex="-1">찜한 메뉴 (<span id="favoriteCount">0</span>)</h2>
+        <p>찜한 메뉴는 이 브라우저에 저장되며, 다시 시작해도 유지됩니다.</p>
+        <p id="storageMessage" class="field-hint" role="status" hidden></p>
+        <p id="favoritesMessage" class="favorite-message" role="status"></p>
+
+        <div id="emptyFavorites">
+            <p>아직 찜한 메뉴가 없어요. 메뉴를 추천받고 마음에 드는 메뉴를 찜해 보세요.</p>
+            <button type="button" id="emptyRecommendButton">메뉴 추천받기</button>
+        </div>
+
+        <ul id="favoriteList" class="favorite-list"></ul>
+
+        <div id="favorite-detail" hidden>
+            <h3 id="favoriteDetailTitle" tabindex="-1"></h3>
+            <p>찜할 때 선택한 취향이에요.</p>
+            <p id="favoriteDetailSummary" class="selection-summary"></p>
+            <button type="button" id="backToFavoritesButton" class="secondary">목록으로 돌아가기</button>
+        </div>
+    </section>
+
+    <section id="meal-record">
+        <h2>오늘의 식사 기록</h2>
+        <p>오늘 먹은 메뉴와 만족도를 기록해 보세요. 식사 기록은 이 브라우저에 저장됩니다.</p>
+
+        <ol class="steps meal-steps" aria-label="식사 기록 진행 단계">
+            <li aria-current="step">[1] 기록 시작하기</li>
+            <li>[2] 기록하기</li>
+            <li>[3] 기록 보기</li>
+        </ol>
+
+        <button type="button" id="mealStartButton" aria-controls="meal-form" aria-expanded="false">기록하기</button>
+        <button type="button" id="mealViewButton" class="secondary" aria-controls="mealRecordsPanel">기록 보기</button>
+
+        <form id="meal-form" novalidate hidden>
+            <label for="mealName">먹은 메뉴 (필수)</label>
+            <input type="text" id="mealName" name="mealName" maxlength="30" required aria-describedby="mealNameHelp mealMessage">
+            <p id="mealNameHelp">앞뒤 공백을 제외하고 2~30자로 입력해 주세요.</p>
+            <p id="mealNameStatus" class="input-status" aria-live="polite" hidden></p>
+
+            <fieldset id="mealRating" class="rating-field" aria-describedby="mealRatingHelp mealMessage">
+                <legend>만족도 (필수)</legend>
+                <div class="rating-options">
+                    <label for="mealRatingGood"><input type="radio" id="mealRatingGood" name="mealRating" value="good" required>좋았어요</label>
+                    <label for="mealRatingNormal"><input type="radio" id="mealRatingNormal" name="mealRating" value="normal" required>보통이에요</label>
+                    <label for="mealRatingBad"><input type="radio" id="mealRatingBad" name="mealRating" value="bad" required>아쉬웠어요</label>
+                </div>
+                <p id="mealRatingHelp">오늘 식사가 어땠는지 하나 선택해 주세요.</p>
+            </fieldset>
+
+            <div id="mealReasonArea" hidden>
+                <label for="mealReason">아쉬웠던 이유 (필수)</label>
+                <textarea id="mealReason" name="mealReason" rows="3" maxlength="100" required disabled aria-describedby="mealReasonHelp mealMessage"></textarea>
+                <p id="mealReasonHelp">앞뒤 공백을 제외하고 10~100자로 입력해 주세요.</p>
+                <p id="mealReasonStatus" class="input-status" aria-live="polite" hidden></p>
+            </div>
+
+            <div class="flow-buttons">
+                <button type="submit" id="mealSubmitButton">식사 기록 저장</button>
+                <button type="reset" id="mealResetButton" class="secondary">다시 작성</button>
+                <button type="button" id="mealCancelButton" class="secondary">취소</button>
+            </div>
+        </form>
+        <p id="mealMessage" class="favorite-message" role="status"></p>
+
+        <div id="mealRecordsPanel" hidden>
+            <h3 id="mealRecordsTitle" tabindex="-1">내 식사 기록</h3>
+            <p id="emptyMeals">아직 식사 기록이 없어요.</p>
+            <ul id="mealRecords" class="favorite-list"></ul>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>오늘뭐먹지</p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

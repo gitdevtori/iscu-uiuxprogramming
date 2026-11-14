@@ -26,8 +26,32 @@ header h1 {
 }
 
 header p {
-    margin: 0 0 25px;
+    margin: 0;
     font-size: 18px;
+}
+
+/* 메뉴 열기·닫기 버튼은 좁은 화면에서만 표시 */
+#menuButton {
+    display: none;
+    color: #ffffff;
+    background-color: transparent;
+    border: 1px solid #ffffff;
+}
+
+/* 주요 메뉴 */
+nav {
+    background-color: #c4501f;
+    padding: 12px 20px;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 nav a {
@@ -41,8 +65,15 @@ nav a {
 }
 
 nav a:hover {
+    background-color: #ffeadf;
+    color: #c4501f;
+}
+
+/* 현재 위치 메뉴 */
+nav a[aria-current="page"] {
     background-color: #ffffff;
-    color: #ff7a45;
+    color: #c4501f;
+    font-weight: bold;
 }
 
 /* 본문 영역 */
@@ -389,17 +420,32 @@ footer p {
     }
 
     header p {
-        margin-bottom: 20px;
         font-size: 16px;
     }
 
+    #menuButton {
+        display: block;
+        margin-top: 15px;
+    }
+
     nav {
+        padding: 0 15px;
+    }
+
+    /* 좁은 화면에서는 버튼을 눌렀을 때만 메뉴를 세로로 표시 */
+    nav ul {
+        display: none;
+    }
+
+    nav ul.is-open {
         display: flex;
         flex-direction: column;
         gap: 8px;
+        padding: 12px 0;
     }
 
     nav a {
+        display: block;
         margin: 0;
     }
 

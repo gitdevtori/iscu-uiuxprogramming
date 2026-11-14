@@ -1,3 +1,33 @@
+// 주요 메뉴: 현재 페이지 표시와 모바일 메뉴 열기·닫기
+const menuButton = document.querySelector("#menuButton");
+const mainMenu = document.querySelector("#mainMenu");
+const menuLinks = document.querySelectorAll("#mainMenu a");
+const currentPage = location.pathname.split("/").pop() || "index.html";
+
+menuLinks.forEach(function (link) {
+    if (link.getAttribute("href") === currentPage) {
+        link.setAttribute("aria-current", "page");
+    } else {
+        link.removeAttribute("aria-current");
+    }
+});
+
+// 메뉴 표시 상태, 버튼 문구, aria-expanded를 함께 바꾸는 함수
+function setMenuOpen(isOpen) {
+    mainMenu.classList.toggle("is-open", isOpen);
+    menuButton.textContent = isOpen ? "메뉴 닫기" : "메뉴 열기";
+    menuButton.setAttribute("aria-expanded", isOpen);
+}
+
+menuButton.addEventListener("click", function () {
+    setMenuOpen(!mainMenu.classList.contains("is-open"));
+});
+menuLinks.forEach(function (link) {
+    link.addEventListener("click", function () {
+        setMenuOpen(false);
+    });
+});
+
 // 필요한 요소 선택
 const recommendForm = document.querySelector("#recommend-form");
 const categorySelect = document.querySelector("#category");

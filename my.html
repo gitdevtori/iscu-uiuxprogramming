@@ -9,6 +9,7 @@
 </head>
 
 <body>
+<a href="#main-content" class="skip-link">본문 바로가기</a>
 
 <header>
     <h1>오늘뭐먹지</h1>
@@ -20,21 +21,21 @@
     <ul id="mainMenu">
         <li><a href="index.html">서비스 소개</a></li>
         <li><a href="recommend.html">메뉴 추천받기</a></li>
-        <li><a href="my.html">내 기록</a></li>
+        <li><a href="my.html" aria-current="page">내 기록</a></li>
     </ul>
 </nav>
 
-<main>
+<main id="main-content" tabindex="-1">
 
     <section id="favorites">
         <h2 id="favoritesTitle" tabindex="-1">찜한 메뉴 (<span id="favoriteCount">0</span>)</h2>
         <p>찜한 메뉴는 이 브라우저에 저장되며, 다시 시작해도 유지됩니다.</p>
-        <p id="storageMessage" class="field-hint" role="status" hidden></p>
+        <p id="storageMessage" class="field-hint" role="alert" hidden></p>
         <p id="favoritesMessage" class="favorite-message" role="status"></p>
 
         <div id="emptyFavorites">
             <p>아직 찜한 메뉴가 없어요. 메뉴를 추천받고 마음에 드는 메뉴를 찜해 보세요.</p>
-            <button type="button" id="emptyRecommendButton">메뉴 추천받기</button>
+            <a href="recommend.html#input" id="emptyRecommendButton" class="button-link">메뉴 추천받기</a>
         </div>
 
         <ul id="favoriteList" class="favorite-list"></ul>
@@ -43,7 +44,7 @@
             <h3 id="favoriteDetailTitle" tabindex="-1"></h3>
             <p>찜할 때 선택한 취향이에요.</p>
             <p id="favoriteDetailSummary" class="selection-summary"></p>
-            <button type="button" id="backToFavoritesButton" class="secondary">목록으로 돌아가기</button>
+            <button type="button" id="backToFavoritesButton" class="secondary">찜한 메뉴 목록으로 돌아가기</button>
         </div>
     </section>
 
@@ -57,16 +58,17 @@
             <li>[3] 기록 보기</li>
         </ol>
 
-        <button type="button" id="mealStartButton" aria-controls="meal-form" aria-expanded="false">기록하기</button>
-        <button type="button" id="mealViewButton" class="secondary" aria-controls="mealRecordsPanel">기록 보기</button>
+        <button type="button" id="mealStartButton" aria-controls="meal-form" aria-expanded="false">식사 기록 작성</button>
+        <button type="button" id="mealViewButton" class="secondary" aria-controls="mealRecordsPanel">식사 기록 보기</button>
 
         <form id="meal-form" novalidate hidden>
             <label for="mealName">먹은 메뉴 (필수)</label>
-            <input type="text" id="mealName" name="mealName" maxlength="30" required aria-describedby="mealNameHelp mealMessage">
+            <input type="text" id="mealName" name="mealName" maxlength="30" required aria-describedby="mealNameHelp mealNameStatus mealNameError">
             <p id="mealNameHelp">앞뒤 공백을 제외하고 2~30자로 입력해 주세요.</p>
             <p id="mealNameStatus" class="input-status" aria-live="polite" hidden></p>
+            <p id="mealNameError" class="field-hint" hidden></p>
 
-            <fieldset id="mealRating" class="rating-field" aria-describedby="mealRatingHelp mealMessage">
+            <fieldset id="mealRating" class="rating-field" role="radiogroup" aria-describedby="mealRatingHelp mealRatingError">
                 <legend>만족도 (필수)</legend>
                 <div class="rating-options">
                     <label for="mealRatingGood"><input type="radio" id="mealRatingGood" name="mealRating" value="good" required>좋았어요</label>
@@ -74,26 +76,28 @@
                     <label for="mealRatingBad"><input type="radio" id="mealRatingBad" name="mealRating" value="bad" required>아쉬웠어요</label>
                 </div>
                 <p id="mealRatingHelp">오늘 식사가 어땠는지 하나 선택해 주세요.</p>
+                <p id="mealRatingError" class="field-hint" hidden></p>
             </fieldset>
 
             <div id="mealReasonArea" hidden>
                 <label for="mealReason">아쉬웠던 이유 (필수)</label>
-                <textarea id="mealReason" name="mealReason" rows="3" maxlength="100" required disabled aria-describedby="mealReasonHelp mealMessage"></textarea>
+                <textarea id="mealReason" name="mealReason" rows="3" maxlength="100" required disabled aria-describedby="mealReasonHelp mealReasonStatus mealReasonError"></textarea>
                 <p id="mealReasonHelp">앞뒤 공백을 제외하고 10~100자로 입력해 주세요.</p>
                 <p id="mealReasonStatus" class="input-status" aria-live="polite" hidden></p>
+                <p id="mealReasonError" class="field-hint" hidden></p>
             </div>
 
             <div class="flow-buttons">
                 <button type="submit" id="mealSubmitButton">식사 기록 저장</button>
-                <button type="reset" id="mealResetButton" class="secondary">다시 작성</button>
-                <button type="button" id="mealCancelButton" class="secondary">취소</button>
+                <button type="reset" id="mealResetButton" class="secondary">입력 초기화</button>
+                <button type="button" id="mealCancelButton" class="secondary">작성 취소</button>
             </div>
         </form>
         <p id="mealMessage" class="favorite-message" role="status"></p>
 
         <div id="mealRecordsPanel" hidden>
             <h3 id="mealRecordsTitle" tabindex="-1">내 식사 기록</h3>
-            <div class="filters" aria-label="만족도 필터">
+            <div class="filters" role="group" aria-label="만족도 필터">
                 <button type="button" class="filter is-active" data-filter="all" aria-pressed="true">전체</button>
                 <button type="button" class="filter" data-filter="good" aria-pressed="false">좋았어요</button>
                 <button type="button" class="filter" data-filter="normal" aria-pressed="false">보통이에요</button>

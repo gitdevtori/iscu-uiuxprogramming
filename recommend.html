@@ -9,6 +9,7 @@
 </head>
 
 <body>
+<a href="#main-content" class="skip-link">본문 바로가기</a>
 
 <header>
     <h1>오늘뭐먹지</h1>
@@ -19,26 +20,27 @@
 <nav aria-label="주요 메뉴">
     <ul id="mainMenu">
         <li><a href="index.html">서비스 소개</a></li>
-        <li><a href="recommend.html">메뉴 추천받기</a></li>
+        <li><a href="recommend.html" aria-current="page">메뉴 추천받기</a></li>
         <li><a href="my.html">내 기록</a></li>
     </ul>
 </nav>
 
-<main>
+<main id="main-content" tabindex="-1">
 
     <section id="recommend">
         <h2>종류별 메뉴 둘러보기</h2>
+        <p>음식 종류 탭을 선택해 추천 후보 메뉴를 미리 살펴보세요. 탭에서는 좌우 방향키로 이동할 수 있습니다.</p>
 
-        <img src="assets/images/food.png" alt="다양한 음식이 놓여 있는 식탁">
+        <img src="assets/images/food.png" alt="한식(찌개·비빔밥), 양식(피자·파스타·햄버거), 일식(초밥), 분식(떡볶이) 등 종류별 대표 메뉴가 차려진 식탁">
 
-        <div class="tabs" role="tablist">
-            <button type="button" class="tab is-active" role="tab" data-tab="korean" aria-selected="true">한식</button>
-            <button type="button" class="tab" role="tab" data-tab="western" aria-selected="false">양식</button>
-            <button type="button" class="tab" role="tab" data-tab="japanese" aria-selected="false">일식</button>
-            <button type="button" class="tab" role="tab" data-tab="snack" aria-selected="false">분식</button>
+        <div class="tabs" role="tablist" aria-label="음식 종류">
+            <button type="button" id="tab-korean" class="tab is-active" role="tab" data-tab="korean" aria-selected="true" aria-controls="panel-korean" tabindex="0">한식</button>
+            <button type="button" id="tab-western" class="tab" role="tab" data-tab="western" aria-selected="false" aria-controls="panel-western" tabindex="-1">양식</button>
+            <button type="button" id="tab-japanese" class="tab" role="tab" data-tab="japanese" aria-selected="false" aria-controls="panel-japanese" tabindex="-1">일식</button>
+            <button type="button" id="tab-snack" class="tab" role="tab" data-tab="snack" aria-selected="false" aria-controls="panel-snack" tabindex="-1">분식</button>
         </div>
 
-        <div class="tab-panel" id="panel-korean" role="tabpanel">
+        <div class="tab-panel" id="panel-korean" role="tabpanel" aria-labelledby="tab-korean">
             <ul class="menu-list">
                 <li>김치찌개</li>
                 <li>된장찌개</li>
@@ -48,7 +50,7 @@
             </ul>
         </div>
 
-        <div class="tab-panel" id="panel-western" role="tabpanel" hidden>
+        <div class="tab-panel" id="panel-western" role="tabpanel" aria-labelledby="tab-western" hidden>
             <ul class="menu-list">
                 <li>파스타</li>
                 <li>피자</li>
@@ -58,7 +60,7 @@
             </ul>
         </div>
 
-        <div class="tab-panel" id="panel-japanese" role="tabpanel" hidden>
+        <div class="tab-panel" id="panel-japanese" role="tabpanel" aria-labelledby="tab-japanese" hidden>
             <ul class="menu-list">
                 <li>초밥</li>
                 <li>우동</li>
@@ -68,7 +70,7 @@
             </ul>
         </div>
 
-        <div class="tab-panel" id="panel-snack" role="tabpanel" hidden>
+        <div class="tab-panel" id="panel-snack" role="tabpanel" aria-labelledby="tab-snack" hidden>
             <ul class="menu-list">
                 <li>떡볶이</li>
                 <li>김밥</li>
@@ -106,7 +108,7 @@
                     <option value="japanese">일식</option>
                     <option value="snack">분식</option>
                 </select>
-                <p id="categoryHint" class="field-hint" hidden>음식 종류를 선택해 주세요.</p>
+                <p id="categoryHint" class="field-hint" hidden></p>
 
                 <label for="spicy">매운맛 선호 (필수)</label>
                 <select id="spicy" name="spicy" aria-describedby="spicyHint" required>
@@ -115,11 +117,11 @@
                     <option value="mild">매운 음식 제외</option>
                     <option value="hot">매운 음식 선호</option>
                 </select>
-                <p id="spicyHint" class="field-hint" hidden>매운맛 선호를 선택해 주세요.</p>
+                <p id="spicyHint" class="field-hint" hidden></p>
 
                 <div class="flow-buttons">
-                    <button type="button" id="previousButton" class="secondary">이전</button>
-                    <button type="submit">다음</button>
+                    <button type="button" id="previousButton" class="secondary">시작 화면으로</button>
+                    <button type="submit">선택 내용 확인</button>
                 </div>
             </form>
         </div>
@@ -132,9 +134,9 @@
                 <dt>매운맛 선호</dt>
                 <dd id="spicySummary"></dd>
             </dl>
-            <p id="noResultMessage" class="field-hint" role="alert" hidden>맞는 메뉴가 없어요. ‘수정하기’에서 조건을 바꿔 주세요.</p>
+            <p id="noResultMessage" class="field-hint" role="alert" hidden>[오류] 선택한 조건에 맞는 메뉴가 없어요. '취향 다시 선택' 버튼을 눌러 음식 종류나 매운맛 선호를 바꿔 주세요.</p>
             <div class="flow-buttons">
-                <button type="button" id="editButton" class="secondary">수정하기</button>
+                <button type="button" id="editButton" class="secondary">취향 다시 선택</button>
                 <button type="button" id="recommendButton">추천받기</button>
             </div>
         </div>
@@ -145,12 +147,13 @@
             <p id="recommendMessage" class="is-success"></p>
             <div class="flow-buttons">
                 <button type="button" id="favoriteButton">이 메뉴 찜하기</button>
-                <button type="button" id="viewFavoritesButton" class="secondary">찜한 메뉴 보기</button>
+                <a href="my.html#favorites" id="viewFavoritesButton" class="button-link secondary">찜한 메뉴 보기</a>
             </div>
             <p id="favoriteMessage" class="favorite-message" role="status"></p>
-            <p id="storageMessage" class="field-hint" role="status" hidden></p>
+            <p id="storageMessage" class="field-hint" role="alert" hidden></p>
             <form id="email-form" novalidate>
-                <label for="email">기록한 취향에 맞게 메뉴를 계속 추천해드릴까요?</label>
+                <p>기록한 취향에 맞게 메뉴를 계속 추천해 드릴까요?</p>
+                <label for="email">추천 메뉴를 받을 이메일 주소 (필수)</label>
                 <input
                     type="email"
                     id="email"
@@ -162,10 +165,10 @@
                     required
                 >
                 <p id="emailHint" aria-live="polite" hidden></p>
-                <button id="emailButton" type="submit" disabled>이메일로 추천받기</button>
+                <button id="emailButton" type="submit">이메일로 추천받기</button>
                 <p id="emailMessage" role="status"></p>
             </form>
-            <button type="button" id="restartButton">다시 시작</button>
+            <button type="button" id="restartButton">메뉴 추천 다시 시작</button>
         </div>
     </section>
 

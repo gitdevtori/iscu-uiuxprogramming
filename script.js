@@ -2,31 +2,70 @@
 const menuButton = document.querySelector("#menuButton");
 const mainMenu = document.querySelector("#mainMenu");
 const menuLinks = document.querySelectorAll("#mainMenu a");
-const currentPage = location.pathname.split("/").pop() || "index.html";
-
-menuLinks.forEach(function (link) {
-    if (link.getAttribute("href") === currentPage) {
-        link.setAttribute("aria-current", "page");
-    } else {
-        link.removeAttribute("aria-current");
-    }
+const rawPage = location.pathname.split("/").pop() || "index.html";
+const currentPage = rawPage.includes(".") ? rawPage : rawPage + ".html";
+const hasMatchingLink = Array.from(menuLinks).some(function (link) {
+    return link.getAttribute("href") === currentPage;
 });
+
+if (hasMatchingLink) {
+    menuLinks.forEach(function (link) {
+        if (link.getAttribute("href") === currentPage) {
+            link.setAttribute("aria-current", "page");
+        } else {
+            link.removeAttribute("aria-current");
+        }
+    });
+}
 
 // 메뉴 표시 상태, 버튼 문구, aria-expanded를 함께 바꾸는 함수
 function setMenuOpen(isOpen) {
     mainMenu.classList.toggle("is-open", isOpen);
     menuButton.textContent = isOpen ? "메뉴 닫기" : "메뉴 열기";
-    menuButton.setAttribute("aria-expanded", isOpen);
+    menuButton.setAttribute("aria-expanded", String(isOpen));
 }
 
 menuButton.addEventListener("click", function () {
     setMenuOpen(!mainMenu.classList.contains("is-open"));
 });
+
 menuLinks.forEach(function (link) {
     link.addEventListener("click", function () {
         setMenuOpen(false);
     });
 });
+
+// 모바일 메뉴가 열린 상태에서 Escape 키로 닫고 버튼으로 초점 복귀
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && mainMenu.classList.contains("is-open")) {
+        setMenuOpen(false);
+        if (menuButton.offsetParent !== null) {
+            menuButton.focus();
+        }
+    }
+});
+
+// 상태 메시지의 문구, 스타일, ARIA 역할을 함께 갱신하는 함수
+function setStatusMessage(element, type, text) {
+    if (!element) {
+        return;
+    }
+    element.classList.remove("is-error", "is-success");
+    element.textContent = text;
+    if (!text) {
+        element.setAttribute("role", "status");
+        return;
+    }
+    if (type === "error") {
+        element.classList.add("is-error");
+        element.setAttribute("role", "alert");
+    } else if (type === "success") {
+        element.classList.add("is-success");
+        element.setAttribute("role", "status");
+    } else {
+        element.setAttribute("role", "status");
+    }
+}
 
 // 필요한 요소 선택
 const recommendForm = document.querySelector("#recommend-form");
@@ -121,21 +160,53 @@ function getFoods(category, spicy) {
     });
 }
 
-// 선택한 탭만 강조하고 해당 메뉴 목록만 보여주는 함수
-function showTab(tabName) {
+// 선택한 탭만 강조·초점 가능하게 바꾸고 해당 메뉴 목록만 보여주는 함수
+function showTab(tabName, shouldFocus) {
+    let activeTab = null;
+
     tabButtons.forEach(function (tab) {
         const isSelected = tab.dataset.tab === tabName;
         tab.classList.toggle("is-active", isSelected);
-        tab.setAttribute("aria-selected", isSelected);
+        tab.setAttribute("aria-selected", String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        if (isSelected) {
+            activeTab = tab;
+        }
     });
 
     tabPanels.forEach(function (panel) {
         panel.hidden = panel.id !== "panel-" + tabName;
     });
+
+    if (shouldFocus && activeTab) {
+        activeTab.focus();
+    }
 }
 
 function handleTabClick(event) {
-    showTab(event.currentTarget.dataset.tab);
+    showTab(event.currentTarget.dataset.tab, false);
+}
+
+// 탭 목록에서 좌우 방향키·Home·End 키로 탭을 전환하는 함수
+function handleTabKeydown(event) {
+    const tabArray = Array.from(tabButtons);
+    const currentIndex = tabArray.indexOf(event.currentTarget);
+    let nextIndex = -1;
+
+    if (event.key === "ArrowRight") {
+        nextIndex = (currentIndex + 1) % tabArray.length;
+    } else if (event.key === "ArrowLeft") {
+        nextIndex = (currentIndex - 1 + tabArray.length) % tabArray.length;
+    } else if (event.key === "Home") {
+        nextIndex = 0;
+    } else if (event.key === "End") {
+        nextIndex = tabArray.length - 1;
+    }
+
+    if (nextIndex !== -1) {
+        event.preventDefault();
+        showTab(tabArray[nextIndex].dataset.tab, true);
+    }
 }
 
 // 현재 단계의 화면과 진행 표시를 바꾸고 제목으로 이동하는 함수
@@ -158,10 +229,15 @@ function showStep(step) {
 }
 
 // 필수 선택이 빠지면 항목 아래에 수정 방법을 표시하는 함수
-function validateSelection(select, hint) {
+function validateSelection(select, hint, errorMessage) {
     const isValid = select.value !== "";
     select.classList.toggle("is-invalid", !isValid);
-    select.setAttribute("aria-invalid", !isValid);
+    if (isValid) {
+        select.removeAttribute("aria-invalid");
+    } else {
+        select.setAttribute("aria-invalid", "true");
+    }
+    hint.textContent = isValid ? "" : errorMessage;
     hint.hidden = isValid;
     return isValid;
 }
@@ -173,8 +249,8 @@ function handleSubmit(event) {
         return;
     }
 
-    const categoryValid = validateSelection(categorySelect, categoryHint);
-    const spicyValid = validateSelection(spicySelect, spicyHint);
+    const categoryValid = validateSelection(categorySelect, categoryHint, "[오류] 음식 종류를 선택해 주세요.");
+    const spicyValid = validateSelection(spicySelect, spicyHint, "[오류] 매운맛 선호를 선택해 주세요.");
 
     if (!categoryValid) {
         categorySelect.focus();
@@ -200,6 +276,7 @@ function handleRecommend() {
     const foods = getFoods(categorySelect.value, spicySelect.value);
     if (foods.length === 0) {
         noResultMessage.hidden = false;
+        document.querySelector("#editButton").focus();
         return;
     }
 
@@ -209,9 +286,9 @@ function handleRecommend() {
         category: categorySelect.value,
         spicy: spicySelect.value
     };
-    completedSummary.textContent = categoryNames[categorySelect.value] + " · " + spicyNames[spicySelect.value];
+    completedSummary.textContent = "선택한 취향: " + categoryNames[categorySelect.value] + " · " + spicyNames[spicySelect.value];
     recommendMessage.textContent = "오늘의 추천 메뉴는 \"" + foods[index].name + "\"입니다.";
-    favoriteMessage.textContent = "";
+    setStatusMessage(favoriteMessage, "info", "");
     updateFavoriteButton();
     showStep(3);
 }
@@ -225,6 +302,8 @@ function handleRestart() {
     spicySelect.classList.remove("is-invalid");
     categorySelect.removeAttribute("aria-invalid");
     spicySelect.removeAttribute("aria-invalid");
+    categoryHint.textContent = "";
+    spicyHint.textContent = "";
     categoryHint.hidden = true;
     spicyHint.hidden = true;
     noResultMessage.hidden = true;
@@ -233,7 +312,7 @@ function handleRestart() {
     completedSummary.textContent = "";
     recommendMessage.textContent = "";
     currentRecommendation = null;
-    favoriteMessage.textContent = "";
+    setStatusMessage(favoriteMessage, "info", "");
     updateFavoriteButton();
     showStep(0);
 }
@@ -255,7 +334,7 @@ function loadFavorites() {
         }
         favorites = savedFavorites;
     } catch (error) {
-        storageMessage.textContent = "찜 목록을 불러오지 못했어요. 새로고침하거나 메뉴를 다시 찜해 주세요.";
+        storageMessage.textContent = "[오류] 찜 목록을 불러오지 못했어요. 새로고침하거나 메뉴를 다시 찜해 주세요.";
         storageMessage.hidden = false;
     }
 }
@@ -269,7 +348,7 @@ function saveFavorites(nextFavorites) {
         storageMessage.hidden = true;
         return true;
     } catch (error) {
-        storageMessage.textContent = "변경 내용을 저장하지 못했어요. 브라우저 저장 설정을 확인하고 다시 눌러 주세요.";
+        storageMessage.textContent = "[오류] 변경 내용을 저장하지 못했어요. 브라우저 저장 설정을 확인하고 다시 눌러 주세요.";
         storageMessage.hidden = false;
         return false;
     }
@@ -281,7 +360,7 @@ function updateFavoriteButton() {
         return favorite.name === currentRecommendation.name;
     });
     favoriteButton.disabled = currentRecommendation === null || isSaved;
-    favoriteButton.textContent = isSaved ? "찜한 메뉴" : "이 메뉴 찜하기";
+    favoriteButton.textContent = isSaved ? "이미 찜한 메뉴" : "이 메뉴 찜하기";
 }
 
 // 찜 목록과 개수를 갱신하고, 비어 있으면 추천 시작을 안내하는 함수
@@ -308,7 +387,7 @@ function renderFavorites() {
         buttons.className = "flow-buttons";
         viewButton.type = "button";
         viewButton.textContent = "다시 보기";
-        viewButton.setAttribute("aria-label", favorite.name + " 다시 보기");
+        viewButton.setAttribute("aria-label", favorite.name + " 상세 다시 보기");
         viewButton.addEventListener("click", function () {
             showFavorite(favorite);
         });
@@ -338,15 +417,16 @@ function handleFavorite() {
         return favorite.name === currentRecommendation.name;
     });
     if (isSaved) {
-        favoriteMessage.textContent = "이미 찜한 메뉴예요. 찜한 메뉴 목록에서 다시 볼 수 있어요.";
+        setStatusMessage(favoriteMessage, "info", "[안내] 이미 찜한 메뉴예요. '찜한 메뉴 보기'에서 다시 볼 수 있어요.");
         return;
     }
     if (!saveFavorites(favorites.concat(currentRecommendation))) {
-        favoriteMessage.textContent = storageMessage.textContent;
+        setStatusMessage(favoriteMessage, "info", "");
         return;
     }
     updateFavoriteButton();
-    favoriteMessage.textContent = "\"" + currentRecommendation.name + "\" 메뉴를 찜했어요. 찜한 메뉴 보기에서 확인해 주세요.";
+    setStatusMessage(favoriteMessage, "success", "[완료] \"" + currentRecommendation.name + "\" 메뉴를 찜했어요. '찜한 메뉴 보기'에서 확인해 주세요.");
+    document.querySelector("#viewFavoritesButton").focus();
 }
 
 // 새 추천을 실행하지 않고 찜할 당시의 메뉴와 선택값을 보여주는 함수
@@ -355,7 +435,7 @@ function showFavorite(favorite) {
     favoriteDetailSummary.textContent = categoryNames[favorite.category] + " · " + spicyNames[favorite.spicy];
     favoriteList.hidden = true;
     favoriteDetail.hidden = false;
-    favoritesMessage.textContent = "";
+    setStatusMessage(favoritesMessage, "info", "");
     favoriteDetailTitle.focus();
 }
 
@@ -368,7 +448,7 @@ function removeFavorite(name) {
         return;
     }
     renderFavorites();
-    favoritesMessage.textContent = name + " 찜을 해제했어요.";
+    setStatusMessage(favoritesMessage, "success", "[완료] \"" + name + "\" 찜을 해제했어요.");
     favoritesTitle.focus();
 }
 
@@ -383,13 +463,14 @@ function handleEmailInput() {
     } else {
         emailInput.removeAttribute("aria-invalid");
     }
+    emailHint.removeAttribute("role");
     emailHint.hidden = isEmpty || isValid;
-    emailHint.textContent = isEmpty
+    emailHint.textContent = (isEmpty || isValid)
         ? ""
-        : "name@example.com 형식으로 입력해 주세요.";
-    emailButton.disabled = !isValid;
+        : "[오류] 이메일 형식이 올바르지 않아요. 예: name@example.com 형식으로 입력해 주세요.";
+    emailButton.disabled = false;
     emailButton.textContent = "이메일로 추천받기";
-    emailMessage.textContent = "";
+    setStatusMessage(emailMessage, "info", "");
 }
 
 // 이메일 신청을 처리하는 함수
@@ -398,10 +479,12 @@ function handleEmailSubmit(event) {
     if (currentStep !== 3) {
         return;
     }
-    handleEmailInput();
-    if (!emailInput.validity.valid) {
+    const trimmed = emailInput.value.trim();
+    if (trimmed === "" || !emailInput.validity.valid) {
         emailHint.hidden = false;
-        emailHint.textContent = "이메일을 name@example.com 형식으로 입력해 주세요.";
+        emailHint.textContent = trimmed === ""
+            ? "[오류] 이메일 주소를 입력해 주세요. 예: name@example.com"
+            : "[오류] 이메일 형식이 올바르지 않아요. 예: name@example.com 형식으로 입력해 주세요.";
         emailHint.classList.add("is-invalid");
         emailInput.classList.add("is-invalid");
         emailInput.setAttribute("aria-invalid", "true");
@@ -409,18 +492,23 @@ function handleEmailSubmit(event) {
         return;
     }
 
-    emailMessage.textContent = "선택한 취향: " + completedSummary.textContent;
-    emailButton.textContent = "입력 완료";
+    emailHint.textContent = "";
+    emailHint.hidden = true;
+    const summaryText = categoryNames[categorySelect.value] + " · " + spicyNames[spicySelect.value];
+    setStatusMessage(
+        emailMessage,
+        "success",
+        "[완료] " + trimmed + " 주소로 '" + summaryText + "' 취향 추천 신청이 접수되었어요."
+    );
+    emailButton.textContent = "신청 완료";
     emailButton.disabled = true;
+    document.querySelector("#restartButton").focus();
 }
 
 // 메뉴 추천 페이지(recommend.html)
 if (recommendForm) {
     emailInput.addEventListener("input", handleEmailInput);
     favoriteButton.addEventListener("click", handleFavorite);
-    document.querySelector("#viewFavoritesButton").addEventListener("click", function () {
-        location.href = "my.html#favorites";
-    });
     emailForm.addEventListener("submit", handleEmailSubmit);
     recommendForm.addEventListener("submit", handleSubmit);
     document.querySelector("#startButton").addEventListener("click", function () {
@@ -436,13 +524,14 @@ if (recommendForm) {
     document.querySelector("#recommendButton").addEventListener("click", handleRecommend);
     document.querySelector("#restartButton").addEventListener("click", handleRestart);
     categorySelect.addEventListener("change", function () {
-        validateSelection(categorySelect, categoryHint);
+        validateSelection(categorySelect, categoryHint, "[오류] 음식 종류를 선택해 주세요.");
     });
     spicySelect.addEventListener("change", function () {
-        validateSelection(spicySelect, spicyHint);
+        validateSelection(spicySelect, spicyHint, "[오류] 매운맛 선호를 선택해 주세요.");
     });
     tabButtons.forEach(function (tab) {
         tab.addEventListener("click", handleTabClick);
+        tab.addEventListener("keydown", handleTabKeydown);
     });
     loadFavorites();
     updateFavoriteButton();
@@ -454,9 +543,6 @@ if (favoriteList) {
         favoriteDetail.hidden = true;
         favoriteList.hidden = false;
         favoritesTitle.focus();
-    });
-    document.querySelector("#emptyRecommendButton").addEventListener("click", function () {
-        location.href = "recommend.html#input";
     });
     loadFavorites();
     renderFavorites();
@@ -471,12 +557,15 @@ const mealCancelButton = document.querySelector("#mealCancelButton");
 const mealRecordsTitle = document.querySelector("#mealRecordsTitle");
 const mealSteps = document.querySelectorAll(".meal-steps li");
 const mealNameInput = document.querySelector("#mealName");
+const mealNameError = document.querySelector("#mealNameError");
 const mealRatingField = document.querySelector("#mealRating");
+const mealRatingError = document.querySelector("#mealRatingError");
 const mealRatingInputs = document.querySelectorAll("input[name=mealRating]");
 const mealNameStatus = document.querySelector("#mealNameStatus");
 const mealReasonStatus = document.querySelector("#mealReasonStatus");
 const mealReasonArea = document.querySelector("#mealReasonArea");
 const mealReasonInput = document.querySelector("#mealReason");
+const mealReasonError = document.querySelector("#mealReasonError");
 const mealSubmitButton = document.querySelector("#mealSubmitButton");
 const mealResetButton = document.querySelector("#mealResetButton");
 const mealMessage = document.querySelector("#mealMessage");
@@ -494,6 +583,21 @@ let mealRecords = [];
 let isMealSubmitting = false;
 let mealFilter = "all";
 
+// 개별 입력 항목 오류 표시를 갱신하는 함수
+function setFieldError(target, errorElement, message) {
+    const hasError = Boolean(message);
+    target.classList.toggle("is-invalid", hasError);
+    if (hasError) {
+        target.setAttribute("aria-invalid", "true");
+    } else {
+        target.removeAttribute("aria-invalid");
+    }
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.hidden = !hasError;
+    }
+}
+
 // 시작, 입력, 기록 보기 중 현재 단계에 해당하는 영역만 표시하는 함수
 function showMealStep(step) {
     const isOpen = step === 1;
@@ -508,7 +612,7 @@ function showMealStep(step) {
     mealRecordsPanel.hidden = step !== 2;
     mealViewButton.hidden = step !== 0;
     mealStartButton.hidden = isOpen;
-    mealStartButton.setAttribute("aria-expanded", isOpen);
+    mealStartButton.setAttribute("aria-expanded", String(isOpen));
     setMealSubmitting(false);
     if (isOpen) {
         mealNameInput.focus();
@@ -525,29 +629,41 @@ function getMealRating() {
     return selected ? selected.value : "";
 }
 
-// 입력 중에는 오류 대신 작은 상태 배지로 글자 수와 충족 여부를 표시
+// 입력 중 글자 수와 충족 여부를 색상뿐 아니라 문구·기호로 함께 표시
 function updateMealStatus(input, status, minimum, maximum) {
     const length = input.value.trim().length;
     const isValid = length >= minimum && length <= maximum;
     status.hidden = length === 0;
     status.classList.toggle("is-complete", isValid);
-    status.textContent = length + " / " + maximum + "자";
+    if (length === 0) {
+        status.textContent = "";
+    } else if (isValid) {
+        status.textContent = "✓ " + length + " / " + maximum + "자 (입력 가능)";
+    } else if (length < minimum) {
+        status.textContent = length + " / " + maximum + "자 (" + minimum + "자 이상 필요)";
+    } else {
+        status.textContent = length + " / " + maximum + "자 (" + maximum + "자 이하 필요)";
+    }
 }
 
 // 저장할 때 입력 길이를 검사하는 함수
-function validateMealText(input, minimum, maximum) {
+function validateMealText(input, errorElement, minimum, maximum, errorText) {
     const length = input.value.trim().length;
     const isValid = length >= minimum && length <= maximum;
-    input.classList.toggle("is-invalid", !isValid);
-    input.setAttribute("aria-invalid", !isValid);
+    setFieldError(input, errorElement, isValid ? "" : errorText);
     return isValid;
 }
 
 // 아쉬웠어요를 선택한 경우에만 이유를 표시하고 입력을 활성화하는 함수
 function toggleMealReason() {
-    mealReasonArea.hidden = getMealRating() !== "bad";
-    mealReasonInput.disabled = getMealRating() !== "bad";
-    mealMessage.textContent = "";
+    const isBad = getMealRating() === "bad";
+    mealReasonArea.hidden = !isBad;
+    mealReasonInput.disabled = !isBad;
+    if (!isBad) {
+        setFieldError(mealReasonInput, mealReasonError, "");
+    }
+    setFieldError(mealRatingField, mealRatingError, "");
+    setStatusMessage(mealMessage, "info", "");
 }
 
 // 저장된 식사 기록 중 선택한 만족도에 맞는 것만 텍스트로 표시하는 함수
@@ -560,7 +676,7 @@ function renderMealRecords() {
         }
         shownCount = shownCount + 1;
         const item = document.createElement("li");
-        const title = document.createElement("h3");
+        const title = document.createElement("h4");
         const description = document.createElement("p");
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
@@ -587,7 +703,7 @@ function renderMealRecords() {
     }
     emptyMeals.hidden = shownCount !== 0;
     mealCount.hidden = shownCount === 0;
-    mealCount.textContent = "전체 " + mealRecords.length + "개 중 " + shownCount + "개";
+    mealCount.textContent = "전체 " + mealRecords.length + "개 중 " + shownCount + "개 표시";
 }
 
 // 필터 버튼의 선택 표시와 aria-pressed를 바꾸고 목록을 다시 그리는 함수
@@ -596,9 +712,9 @@ function handleMealFilter(event) {
     mealFilterButtons.forEach(function (button) {
         const isSelected = button.dataset.filter === mealFilter;
         button.classList.toggle("is-active", isSelected);
-        button.setAttribute("aria-pressed", isSelected);
+        button.setAttribute("aria-pressed", String(isSelected));
     });
-    mealMessage.textContent = "";
+    setStatusMessage(mealMessage, "info", "");
     renderMealRecords();
 }
 
@@ -615,10 +731,10 @@ function removeMealRecord(index) {
         const name = mealRecords[index].name;
         mealRecords = nextMeals;
         renderMealRecords();
-        mealMessage.textContent = "\"" + name + "\" 식사 기록을 삭제했어요.";
+        setStatusMessage(mealMessage, "success", "[완료] \"" + name + "\" 식사 기록을 삭제했어요.");
         mealRecordsTitle.focus();
     } catch (error) {
-        mealMessage.textContent = "삭제하지 못했어요. 기록은 유지됩니다. 브라우저 저장 공간과 설정을 확인한 후 다시 시도해 주세요.";
+        setStatusMessage(mealMessage, "error", "[오류] 삭제하지 못했어요. 기록은 유지됩니다. 브라우저 저장 공간과 설정을 확인한 후 다시 시도해 주세요.");
     }
 }
 
@@ -636,7 +752,7 @@ function loadMealRecords() {
         }
         mealRecords = savedMeals;
     } catch (error) {
-        mealMessage.textContent = "식사 기록을 불러오지 못했어요. 브라우저 저장 설정을 확인해 주세요.";
+        setStatusMessage(mealMessage, "error", "[오류] 식사 기록을 불러오지 못했어요. 브라우저 저장 설정을 확인해 주세요.");
     }
     renderMealRecords();
 }
@@ -654,7 +770,7 @@ function setMealSubmitting(isSubmitting) {
         button.disabled = isSubmitting;
     });
     mealSubmitButton.textContent = isSubmitting ? "저장 중…" : "식사 기록 저장";
-    mealForm.setAttribute("aria-busy", isSubmitting);
+    mealForm.setAttribute("aria-busy", String(isSubmitting));
 }
 
 // 입력 검사 후 브라우저에 저장하고 실패하면 입력값을 유지하는 함수
@@ -663,17 +779,32 @@ function handleMealSubmit(event) {
     if (isMealSubmitting || mealForm.hidden) {
         return;
     }
-    const nameValid = validateMealText(mealNameInput, 2, 30);
+    const nameValid = validateMealText(
+        mealNameInput,
+        mealNameError,
+        2,
+        30,
+        "[오류] 먹은 메뉴를 앞뒤 공백 제외 2~30자로 입력해 주세요."
+    );
     const ratingValid = getMealRating() !== "";
-    mealRatingField.classList.toggle("is-invalid", !ratingValid);
-    mealRatingField.setAttribute("aria-invalid", !ratingValid);
-    const reasonValid = getMealRating() !== "bad" || validateMealText(mealReasonInput, 10, 100);
+    setFieldError(
+        mealRatingField,
+        mealRatingError,
+        ratingValid ? "" : "[오류] 오늘 식사의 만족도를 하나 선택해 주세요."
+    );
+    const reasonValid = getMealRating() !== "bad" || validateMealText(
+        mealReasonInput,
+        mealReasonError,
+        10,
+        100,
+        "[오류] 아쉬웠던 이유를 앞뒤 공백 제외 10~100자로 입력해 주세요."
+    );
     if (!nameValid || !ratingValid || !reasonValid) {
-        mealMessage.textContent = [
-            !nameValid ? "먹은 메뉴를 2~30자로 입력해 주세요." : "",
-            !ratingValid ? "만족도를 선택해 주세요." : "",
-            !reasonValid ? "아쉬웠던 이유를 10~100자로 입력해 주세요." : ""
-        ].filter(Boolean).join(" ");
+        setStatusMessage(
+            mealMessage,
+            "error",
+            "[오류] 입력하지 않았거나 조건에 맞지 않는 항목이 있어요. 표시된 항목을 수정해 주세요."
+        );
         if (!nameValid) {
             mealNameInput.focus();
         } else if (!ratingValid) {
@@ -689,7 +820,7 @@ function handleMealSubmit(event) {
         reason: getMealRating() === "bad" ? mealReasonInput.value.trim() : ""
     };
     setMealSubmitting(true);
-    mealMessage.textContent = "식사 기록을 저장하고 있어요. 잠시 기다려 주세요.";
+    setStatusMessage(mealMessage, "info", "[진행 중] 식사 기록을 저장하고 있어요. 잠시 기다려 주세요.");
     // 저장 진행 상태를 확인할 수 있도록 잠시 기다린 뒤 저장
     window.setTimeout(function () {
         try {
@@ -700,10 +831,10 @@ function handleMealSubmit(event) {
             setMealSubmitting(false);
             mealForm.reset();
             showMealStep(2);
-            mealMessage.textContent = "\"" + meal.name + "\" 식사를 기록했어요. 아래 목록에서 확인해 주세요.";
+            setStatusMessage(mealMessage, "success", "[완료] \"" + meal.name + "\" 식사를 기록했어요. 아래 목록에서 확인해 주세요.");
         } catch (error) {
             setMealSubmitting(false);
-            mealMessage.textContent = "저장하지 못했어요. 입력 내용은 유지됩니다. 브라우저 저장 공간과 설정을 확인한 후 다시 저장해 주세요.";
+            setStatusMessage(mealMessage, "error", "[오류] 저장하지 못했어요. 입력 내용은 유지됩니다. 브라우저 저장 공간과 설정을 확인한 후 다시 저장해 주세요.");
         }
     }, 700);
 }
@@ -714,10 +845,9 @@ function handleMealReset(event) {
         event.preventDefault();
         return;
     }
-    [mealNameInput, mealRatingField, mealReasonInput].forEach(function (input) {
-        input.classList.remove("is-invalid");
-        input.removeAttribute("aria-invalid");
-    });
+    setFieldError(mealNameInput, mealNameError, "");
+    setFieldError(mealRatingField, mealRatingError, "");
+    setFieldError(mealReasonInput, mealReasonError, "");
     mealNameStatus.hidden = true;
     mealReasonStatus.hidden = true;
     mealNameStatus.textContent = "";
@@ -727,23 +857,20 @@ function handleMealReset(event) {
     mealReasonArea.hidden = true;
     setMealSubmitting(false);
     mealReasonInput.disabled = true;
-    mealMessage.textContent = "";
+    setStatusMessage(mealMessage, "info", "");
 }
 
 // 내 기록 페이지(my.html)의 식사 기록
 if (mealForm) {
     // 입력을 수정하면 이전 오류만 지우고, 검사는 저장 시 실행
-    [mealNameInput, mealRatingField, mealReasonInput].forEach(function (input) {
-        input.addEventListener("input", function () {
-            input.classList.remove("is-invalid");
-            input.removeAttribute("aria-invalid");
-            mealMessage.textContent = "";
-        });
-    });
     mealNameInput.addEventListener("input", function () {
+        setFieldError(mealNameInput, mealNameError, "");
+        setStatusMessage(mealMessage, "info", "");
         updateMealStatus(mealNameInput, mealNameStatus, 2, 30);
     });
     mealReasonInput.addEventListener("input", function () {
+        setFieldError(mealReasonInput, mealReasonError, "");
+        setStatusMessage(mealMessage, "info", "");
         updateMealStatus(mealReasonInput, mealReasonStatus, 10, 100);
     });
     mealRatingInputs.forEach(function (input) {
@@ -752,7 +879,7 @@ if (mealForm) {
     mealForm.addEventListener("submit", handleMealSubmit);
     mealForm.addEventListener("reset", handleMealReset);
     mealViewButton.addEventListener("click", function () {
-        mealMessage.textContent = "";
+        setStatusMessage(mealMessage, "info", "");
         showMealStep(2);
     });
     mealStartButton.addEventListener("click", function () {
